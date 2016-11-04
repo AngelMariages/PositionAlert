@@ -61,6 +61,7 @@ public class LocationApiClient implements GoogleApiClient.ConnectionCallbacks, G
             return LocationServices.FusedLocationApi.getLastLocation(
                     mGoogleApiClient);
         } catch (SecurityException e) {
+            //TODO: check for permissions
             Utils.sendLog("LocationApiClient error: can't get permissions to ");
             e.printStackTrace();
             return null;

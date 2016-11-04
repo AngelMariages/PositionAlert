@@ -22,6 +22,17 @@ public class MapFragmentManager implements OnMapReadyCallback {
     private Marker destinationMarker;
     private Circle destinationCircle;
     private GoogleMap googleMap;
+    private int currentDestinationRadius;
+
+    public String getCurrentDestinationName() {
+        return currentDestinationName;
+    }
+
+    public int getCurrentDestinationRadius() {
+        return currentDestinationRadius;
+    }
+
+    private String currentDestinationName;
 
     public MapFragmentManager(Activity mapFragmentActivity) {
         this.mapFragmentActivity = mapFragmentActivity;
@@ -36,17 +47,18 @@ public class MapFragmentManager implements OnMapReadyCallback {
         googleMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
             @Override
             public void onMapClick(LatLng latLng) {
+                //TODO: add destination to marker and then query it on the activity with current marker
                 onMapFragmentClick(latLng);
             }
         });
 
-        googleMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
-            @Override
-            public boolean onMarkerClick(Marker marker) {
-                marker.showInfoWindow();
-                return true;
-            }
-        });
+        googleMap.setOnInfoWindowClickListener(new GoogleMap.OnInfoWindowClickListener() {
+               @Override
+               public void onInfoWindowClick(Marker marker) {
+                   showMarkerDialog(currentDestinationName, currentDestinationRadius);
+               }
+           }
+        );
 
         googleMap.setOnMarkerDragListener(new GoogleMap.OnMarkerDragListener() {
             @Override
@@ -74,13 +86,11 @@ public class MapFragmentManager implements OnMapReadyCallback {
             googleMap.setMyLocationEnabled(true);
             googleMap.getUiSettings().setMyLocationButtonEnabled(true);
         } else {
-            mapFragmentActivity.runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    ActivityCompat.requestPermissions(mapFragmentActivity,
-                            new String[]{Manifest.permission_group.LOCATION}, 0);
-                }
-            });
+            //TODO: check map settings
+            ActivityCompat.requestPermissions(mapFragmentActivity,
+                            new String[]{Manifest.permission.ACCESS_COARSE_LOCATION,
+                                    Manifest.permission.ACCESS_FINE_LOCATION
+                            }, 0);
         }
     }
 
@@ -103,10 +113,40 @@ public class MapFragmentManager implements OnMapReadyCallback {
                     .strokeWidth(5.0f)
                     .fillColor(Color.argb(0, 0, 0, 0)));
             destinationMarker.showInfoWindow();
+            //If its the first time, show the dialog with settings
+            showMarkerDialog(null, 0);
         } else {
             destinationMarker.setPosition(latLng);
+            destinationMarker.showInfoWindow();
             destinationCircle.setCenter(latLng);
         }
+    }
+
+    private void showMarkerDialog(String destinationName, int radius) {
+        DestinationDialogFragment destinationDialogFragment = DestinationDialogFragment
+                .newInstance(destinationName, radius);
+        destinationDialogFragment.show(mapFragmentActivity.getFragmentManager(), "TAG");
+
+        destinationDialogFragment.setOnDestinationDialogListener(new DestinationDialogFragment.OnDestinationDialogListener() {
+            @Override
+            public void onOkClicked(String destinationName, int radius) {
+                currentDestinationName = destinationName;
+                currentDestinationRadius = radius;
+                destinationMarker.setTitle(currentDestinationName);
+                destinationMarker.showInfoWindow();
+                destinationCircle.setRadius(currentDestinationRadius);
+            }
+
+            @Override
+            public void onDeleteClicked() {
+                destinationMarker.remove();
+                destinationCircle.remove();
+                destinationMarker = null;
+                destinationCircle = null;
+                currentDestinationRadius = 0;
+                currentDestinationName = null;
+            }
+        });
     }
 
     public void setMapFragmentPadding(int left, int top, int right, int bottom) {

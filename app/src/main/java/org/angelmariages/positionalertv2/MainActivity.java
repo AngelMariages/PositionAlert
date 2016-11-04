@@ -1,8 +1,14 @@
 package org.angelmariages.positionalertv2;
 
+import android.content.Context;
 import android.content.Intent;
+import android.database.sqlite.SQLiteDatabase;
+import android.media.Ringtone;
+import android.media.RingtoneManager;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v4.app.Fragment;
 import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -17,7 +23,8 @@ import com.google.android.gms.maps.MapFragment;
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 
-    private MapFragmentManager mapFragmentManager;
+    public MapFragmentManager mapFragmentManager;
+    private MapFragment mapFragment;
     private DestinationManager destinationManager;
     private Destination defaultDestination;
 
@@ -26,18 +33,17 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        MapFragment mapFragment = (MapFragment) getFragmentManager().findFragmentById(R.id.mapFragment);//Afegir mapa
-        mapFragmentManager = new MapFragmentManager(this);
-        mapFragment.getMapAsync(mapFragmentManager);
+        loadMapFragment();
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);//Afegir Toolbar de dalt
         setSupportActionBar(toolbar);
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);//Boto flotant
 
-        //startService(new Intent(this, MainService.class));
-
         destinationManager = new DestinationManager(this.getApplicationContext());
+
+        SQLiteDatabase sqLiteDatabase = openOrCreateDatabase("MyDestinations.db", MODE_PRIVATE, null);
+        final DestinationDBHelper dbHelper = new DestinationDBHelper(this);
 
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -45,11 +51,14 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 if(mapFragmentManager.getDestinationMarker() != null) {
                     defaultDestination = new Destination(
                             mapFragmentManager.getDestinationMarker().getPosition(),
-                            500,
-                            Utils.geofenceDefaultName
+                            mapFragmentManager.getCurrentDestinationRadius(),
+                            mapFragmentManager.getCurrentDestinationName(),
+                            true
                     );
 
                     destinationManager.addDestination(defaultDestination);
+                    dbHelper.insertDestination(defaultDestination);
+                    Utils.sendLog(dbHelper.getDestination(mapFragmentManager.getCurrentDestinationName()).toString());
                 }
                 /**
                     @TODO: add snackbar when removing the fence
@@ -113,13 +122,36 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
+        if (id == R.id.sound_select) {
+            Intent intent = new Intent(RingtoneManager.ACTION_RINGTONE_PICKER);
+            intent.putExtra(RingtoneManager.EXTRA_RINGTONE_TITLE, "Select ringtone for alarm:");
+            intent.putExtra(RingtoneManager.EXTRA_RINGTONE_SHOW_SILENT, false);
+
+            String ringtoneSaved = getSharedPreferences(Utils.SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE)
+                    .getString(Utils.RINGTONE_PREFERENCE, null);
+            if(ringtoneSaved != null)
+                intent.putExtra(RingtoneManager.EXTRA_RINGTONE_EXISTING_URI, Uri.parse(ringtoneSaved));
+
+            intent.putExtra(RingtoneManager.EXTRA_RINGTONE_SHOW_DEFAULT, true);
+            intent.putExtra(RingtoneManager.EXTRA_RINGTONE_TYPE, RingtoneManager.TYPE_RINGTONE);
+            startActivityForResult(intent, Utils.RINGTONE_SELECT_RESULT);
             return true;
         }
 
         return super.onOptionsItemSelected(item);
     }
 
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if(requestCode == Utils.RINGTONE_SELECT_RESULT && resultCode == RESULT_OK) {
+            Uri ringtoneUri = data.getParcelableExtra(RingtoneManager.EXTRA_RINGTONE_PICKED_URI);
+            Ringtone ringtone = RingtoneManager.getRingtone(this, ringtoneUri);
+            Utils.showSToast("Ringtone selected: " + ringtone.getTitle(this), this);
+            getSharedPreferences(Utils.SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE).edit()
+                    .putString(Utils.RINGTONE_PREFERENCE, ringtoneUri.toString())
+                    .apply();
+        }
+    }
 
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {
@@ -127,9 +159,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         int id = item.getItemId();
 
         if (id == R.id.nav_camara) {
-            // Handle the camera action
+            loadMapFragment();
         } else if (id == R.id.nav_gallery) {
-
+            removeMapFragment();
         } else if (id == R.id.nav_slideshow) {
 
         } else if (id == R.id.nav_manage) {
@@ -143,5 +175,19 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
+    }
+
+    public void loadMapFragment() {
+        //mapFragment = (MapFragment) getFragmentManager().findFragmentById(R.id.main_fragment);//Afegir mapa
+        if(mapFragment == null) {
+            mapFragment = MapFragment.newInstance();
+        }
+        getFragmentManager().beginTransaction().add(R.id.main_fragment, mapFragment).commit();
+        mapFragmentManager = new MapFragmentManager(this);
+        mapFragment.getMapAsync(mapFragmentManager);
+    }
+
+    public void removeMapFragment() {
+        getFragmentManager().beginTransaction().remove(mapFragment).commit();
     }
 }

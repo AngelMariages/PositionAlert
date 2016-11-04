@@ -54,11 +54,11 @@ public class DestinationManager implements ResultCallback<Status> {
                     .setRequestId(destination.getRequestId())
                     .setCircularRegion(destination.getLatitude(),
                             destination.getLongitude(),
-                            destination.getdRadius())
+                            destination.getRadius())
                     .setExpirationDuration(Geofence.NEVER_EXPIRE)
                     .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_ENTER |
                             Geofence.GEOFENCE_TRANSITION_EXIT)
-                    .setNotificationResponsiveness(500)
+                    .setNotificationResponsiveness(1000)
                     .build());
 
             LocationServices.GeofencingApi.addGeofences(
@@ -77,8 +77,7 @@ public class DestinationManager implements ResultCallback<Status> {
 
     private PendingIntent getGeofencePendingIntent() {
         return PendingIntent.getService(mContext, 0,
-                //new Intent(mContext, DestinationHandle.class),
-                new Intent(Utils.DESTINATION_SERVICE_NAME),
+                new Intent(mContext, DestinationHandle.class),
                 PendingIntent.FLAG_UPDATE_CURRENT);
     }
 
