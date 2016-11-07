@@ -51,7 +51,7 @@ public class DestinationManager implements ResultCallback<Status> {
     private void addGeofences(Destination destination) {
         try {
             mGeofences.add(new Geofence.Builder()
-                    .setRequestId(destination.getRequestId())
+                    .setRequestId(destination.getName())
                     .setCircularRegion(destination.getLatitude(),
                             destination.getLongitude(),
                             destination.getRadius())

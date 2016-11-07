@@ -6,9 +6,10 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.provider.BaseColumns;
-import android.util.Log;
 
 import com.google.android.gms.maps.model.LatLng;
+
+import java.util.ArrayList;
 
 public class DestinationDBHelper extends SQLiteOpenHelper {
 
@@ -29,7 +30,7 @@ public class DestinationDBHelper extends SQLiteOpenHelper {
     public void onCreate(SQLiteDatabase db) {
         //TODO: replace with variable names
         db.execSQL("CREATE TABLE " + DESTINATIONS_TABLE +
-            "(" + COLUMN_ID + " INTEGER PRIMARY KEY, name TEXT UNIQUE, latitude DOUBLE, longitude DOUBLE, radius INTEGER, active BOOLEAN)");
+            "(" + COLUMN_ID + " INTEGER PRIMARY KEY, name TEXT, latitude DOUBLE, longitude DOUBLE, radius INTEGER, active BOOLEAN)");
     }
 
     @Override
@@ -38,11 +39,16 @@ public class DestinationDBHelper extends SQLiteOpenHelper {
         onCreate(db);
     }
 
+    public void deleteAll(SQLiteDatabase db) {
+        db.execSQL("DROP TABLE IF EXISTS " + DESTINATIONS_TABLE);
+        onCreate(db);
+    }
+
     public boolean insertDestination(Destination destination) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues content = new ContentValues();
 
-        content.put(COLUMN_NAME, destination.getRequestId());
+        content.put(COLUMN_NAME, destination.getName());
         content.put(COLUMN_LAT, destination.getLatitude());
         content.put(COLUMN_LONG, destination.getLongitude());
         content.put(COLUMN_RADIUS, destination.getRadius());
@@ -56,7 +62,7 @@ public class DestinationDBHelper extends SQLiteOpenHelper {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues content = new ContentValues();
 
-        content.put(COLUMN_NAME, destination.getRequestId());
+        content.put(COLUMN_NAME, destination.getName());
         content.put(COLUMN_LAT, destination.getLatitude());
         content.put(COLUMN_LONG, destination.getLongitude());
         content.put(COLUMN_RADIUS, destination.getRadius());
@@ -83,11 +89,36 @@ public class DestinationDBHelper extends SQLiteOpenHelper {
         Destination tmp = new Destination(destLatLng,
                 destRadius,
                 destName,
-                true);
+                true,
+                false);
 
         if(!res.isClosed()) {
             res.close();
         }
         return tmp;
+    }
+
+    public ArrayList<Destination> getAllDestinations() {
+        ArrayList<Destination> destinations = new ArrayList<>();
+
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor res = db.rawQuery("SELECT * FROM " + DESTINATIONS_TABLE, null);
+
+        res.moveToFirst();
+        while (!res.isAfterLast()) {
+            LatLng destLatLng = new LatLng(res.getDouble(res.getColumnIndex(COLUMN_LAT)), res.getDouble(res.getColumnIndex(COLUMN_LONG)));
+            int destRadius = res.getInt(res.getColumnIndex(COLUMN_RADIUS));
+            String destName = res.getString(res.getColumnIndex(COLUMN_NAME));
+
+            Destination tmp = new Destination(destLatLng,
+                    destRadius,
+                    destName,
+                    true,
+                    false);
+            destinations.add(tmp);
+            res.moveToNext();
+        }
+        res.close();
+        return destinations;
     }
 }

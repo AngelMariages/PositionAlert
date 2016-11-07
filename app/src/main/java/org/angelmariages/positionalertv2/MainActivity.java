@@ -2,13 +2,11 @@ package org.angelmariages.positionalertv2;
 
 import android.content.Context;
 import android.content.Intent;
-import android.database.sqlite.SQLiteDatabase;
 import android.media.Ringtone;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
-import android.support.v4.app.Fragment;
 import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -21,12 +19,15 @@ import android.view.MenuItem;
 
 import com.google.android.gms.maps.MapFragment;
 
-public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
+import java.util.ArrayList;
+
+public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, MapFragmentManager.OnDestinationChangeListener {
 
     public MapFragmentManager mapFragmentManager;
     private MapFragment mapFragment;
+
     private DestinationManager destinationManager;
-    private Destination defaultDestination;
+    private final DestinationDBHelper dbHelper = new DestinationDBHelper(this);
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,24 +43,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         destinationManager = new DestinationManager(this.getApplicationContext());
 
-        SQLiteDatabase sqLiteDatabase = openOrCreateDatabase("MyDestinations.db", MODE_PRIVATE, null);
-        final DestinationDBHelper dbHelper = new DestinationDBHelper(this);
+        openOrCreateDatabase("MyDestinations.db", MODE_PRIVATE, null);
 
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if(mapFragmentManager.getDestinationMarker() != null) {
-                    defaultDestination = new Destination(
-                            mapFragmentManager.getDestinationMarker().getPosition(),
-                            mapFragmentManager.getCurrentDestinationRadius(),
-                            mapFragmentManager.getCurrentDestinationName(),
-                            true
-                    );
 
-                    destinationManager.addDestination(defaultDestination);
-                    dbHelper.insertDestination(defaultDestination);
-                    Utils.sendLog(dbHelper.getDestination(mapFragmentManager.getCurrentDestinationName()).toString());
-                }
                 /**
                     @TODO: add snackbar when removing the fence
                     mapFragmentManager.setMapFragmentPadding(0, 0, 0, 48);
@@ -110,7 +99,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     @Override
     protected void onDestroy() {
-        //destinationManager.removeDestination(defaultDestination.getRequestId());
+        //destinationManager.removeDestination(defaultDestination.getName());
         super.onDestroy();
     }
 
@@ -182,12 +171,30 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         if(mapFragment == null) {
             mapFragment = MapFragment.newInstance();
         }
-        getFragmentManager().beginTransaction().add(R.id.main_fragment, mapFragment).commit();
+        getFragmentManager().beginTransaction().replace(R.id.main_fragment, mapFragment).commit();
+
         mapFragmentManager = new MapFragmentManager(this);
+
         mapFragment.getMapAsync(mapFragmentManager);
+
+        mapFragmentManager.setOnMapFragmentReady(new MapFragmentManager.OnMapFragmentReady() {
+            @Override
+            public void onMapFragmentReady() {
+                mapFragmentManager.loadMarkers(getDestinationsFromDB());
+            }
+        });
+    }
+
+    private ArrayList<Destination> getDestinationsFromDB() {
+        return dbHelper.getAllDestinations();
     }
 
     public void removeMapFragment() {
         getFragmentManager().beginTransaction().remove(mapFragment).commit();
+    }
+
+    @Override
+    public void onDeleteDestinationListener(Destination deletedDestination) {
+        dbHelper.deleteDestination(deletedDestination.getName());
     }
 }

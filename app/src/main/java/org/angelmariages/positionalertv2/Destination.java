@@ -6,14 +6,16 @@ public class Destination  {
     private boolean removeOnReach;
     private LatLng dLatLng;
     private int dRadius;
-    private String requestId;
+    private String name;
+    private boolean registered;
 
 
-    public Destination(LatLng dLatLng, int radius, String requestId, boolean removeOnReach) {
+    public Destination(LatLng dLatLng, int radius, String name, boolean removeOnReach, boolean registered) {
         this.dLatLng = dLatLng;
         this.dRadius = radius;
         this.removeOnReach = removeOnReach;
-        this.requestId = requestId;
+        this.name = name;
+        this.registered = registered;
     }
 
     public LatLng getdLatLng() {
@@ -32,8 +34,8 @@ public class Destination  {
         return dRadius;
     }
 
-    public String getRequestId() {
-        return requestId;
+    public String getName() {
+        return name;
     }
 
     @Override
@@ -42,11 +44,19 @@ public class Destination  {
                 "removeOnReach=" + removeOnReach +
                 ", dLatLng=" + dLatLng +
                 ", dRadius=" + dRadius +
-                ", requestId='" + requestId + '\'' +
+                ", name='" + name + '\'' +
                 '}';
     }
 
     public boolean isRemoveOnReach() {
         return removeOnReach;
+    }
+
+    public boolean isRegistered() {
+        return registered;
+    }
+
+    public void setRegistered(boolean registered) {
+        this.registered = registered;
     }
 }
