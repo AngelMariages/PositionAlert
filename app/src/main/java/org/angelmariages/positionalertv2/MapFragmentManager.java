@@ -155,11 +155,15 @@ public class MapFragmentManager implements OnMapReadyCallback {
                 marker.setTitle(destinationName);
                 marker.setTag(tmpDestination);
                 marker.showInfoWindow();
+
+                if(destinationChangeListener != null)
+                    destinationChangeListener.onAddedDestination(tmpDestination);
             }
 
             @Override
             public void onDeleteClicked() {
-                destinationChangeListener.onDeleteDestinationListener((Destination) marker.getTag());
+                if(destinationChangeListener != null && marker.getTag() != null)
+                    destinationChangeListener.onDeletedDestination((Destination) marker.getTag());
                 destinationMarkers.get(marker).remove();
                 marker.remove();
             }
@@ -195,6 +199,8 @@ public class MapFragmentManager implements OnMapReadyCallback {
     }
 
     public interface OnDestinationChangeListener {
-        void onDeleteDestinationListener(Destination deletedDestination);
+        void onDeletedDestination(Destination deletedDestination);
+
+        void onAddedDestination(Destination addedDestination);
     }
 }

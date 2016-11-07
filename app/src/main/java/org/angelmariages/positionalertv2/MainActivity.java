@@ -194,7 +194,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     @Override
-    public void onDeleteDestinationListener(Destination deletedDestination) {
+    public void onDeletedDestination(Destination deletedDestination) {
         dbHelper.deleteDestination(deletedDestination.getName());
+    }
+
+    @Override
+    public void onAddedDestination(Destination addedDestination) {
+        dbHelper.insertDestination(addedDestination);
     }
 }
