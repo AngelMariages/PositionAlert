@@ -2,6 +2,7 @@ package org.angelmariages.positionalertv2;
 
 import android.app.Dialog;
 import android.app.DialogFragment;
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
@@ -10,6 +11,8 @@ import android.widget.TextView;
 public class DestinationDialogFragment extends DialogFragment {
 
     private OnDestinationDialogListener mListener;
+    private TextView destinationText;
+    private TextView destinationRadius;
 
     public interface OnDestinationDialogListener {
         void onOkClicked(String destinationName, int radius);
@@ -26,6 +29,25 @@ public class DestinationDialogFragment extends DialogFragment {
     }
 
     @Override
+    public void onDismiss(DialogInterface dialog) {
+        if(destinationText.getText().toString().isEmpty()) {
+            if (mListener != null) {
+                mListener.onDeleteClicked();
+            }
+        } else {
+            if(mListener != null) {
+                int radius = 500;
+                try {
+                    radius = Integer.parseInt(destinationRadius.getText().toString());
+                } catch (NumberFormatException e) {
+                    e.printStackTrace();
+                }
+                mListener.onOkClicked(destinationText.getText().toString(), radius);
+            }
+        }
+    }
+
+    @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         String destinationName = getArguments().getString("DESTINATION_NAME");
         int radius = getArguments().getInt("DESTINATION_RADIUS");
@@ -36,8 +58,8 @@ public class DestinationDialogFragment extends DialogFragment {
 
         Button okButton = (Button) customDialog.findViewById(R.id.dialogOkButton);
         Button deleteButton = (Button) customDialog.findViewById(R.id.dialogDeleteButton);
-        final TextView destinationText = (TextView) customDialog.findViewById(R.id.destinationNameEdit);
-        final TextView destinationRadius = (TextView) customDialog.findViewById(R.id.destinationRadiusEdit);
+        destinationText = (TextView) customDialog.findViewById(R.id.destinationNameEdit);
+        destinationRadius = (TextView) customDialog.findViewById(R.id.destinationRadiusEdit);
 
         if(destinationName != null) {
             destinationText.setText(destinationName);
@@ -47,16 +69,20 @@ public class DestinationDialogFragment extends DialogFragment {
         okButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if(mListener != null) {
-                    int radius = 500;
-                    try {
-                        radius = Integer.parseInt(destinationRadius.getText().toString());
-                    } catch(NumberFormatException e) {
-                        e.printStackTrace();
+                if(destinationText.getText().toString().isEmpty()) {
+                    destinationText.setError("Put some name!");
+                } else {
+                    if (mListener != null) {
+                        int radius = 500;
+                        try {
+                            radius = Integer.parseInt(destinationRadius.getText().toString());
+                        } catch (NumberFormatException e) {
+                            e.printStackTrace();
+                        }
+                        mListener.onOkClicked(destinationText.getText().toString(), radius);
                     }
-                    mListener.onOkClicked(destinationText.getText().toString(),radius);
+                    customDialog.dismiss();
                 }
-                customDialog.dismiss();
             }
         });
 

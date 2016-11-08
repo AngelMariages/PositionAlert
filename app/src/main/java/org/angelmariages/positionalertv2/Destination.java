@@ -2,7 +2,7 @@ package org.angelmariages.positionalertv2;
 
 import com.google.android.gms.maps.model.LatLng;
 
-public class Destination  {
+public class Destination {
     private boolean removeOnReach;
     private LatLng dLatLng;
     private int dRadius;

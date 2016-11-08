@@ -19,12 +19,13 @@
         <EditText
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:inputType="textPersonName"
+            android:inputType="text"
             android:ems="10"
             android:id="@+id/destinationNameEdit"
             android:hint="My first destination"
             android:layout_weight="1"
-            android:maxLines="1"/>
+            android:maxLines="1"
+            android:autoText="true" />
     </LinearLayout>
 
     <LinearLayout

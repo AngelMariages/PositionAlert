@@ -190,7 +190,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     public void removeMapFragment() {
-        getFragmentManager().beginTransaction().remove(mapFragment).commit();
+        getFragmentManager().beginTransaction().replace(R.id.main_fragment,
+                DestinationList.newInstance(getDestinationsFromDB())).commit();
     }
 
     @Override
