@@ -18,10 +18,17 @@ import android.view.Menu;
 import android.view.MenuItem;
 
 import com.google.android.gms.maps.MapFragment;
+import com.google.android.gms.maps.model.LatLng;
+
+import org.angelmariages.positionalertv2.destination.Destination;
+import org.angelmariages.positionalertv2.destination.DestinationDBHelper;
+import org.angelmariages.positionalertv2.destination.DestinationManager;
+import org.angelmariages.positionalertv2.destination.destinationlist.DestinationList;
+import org.angelmariages.positionalertv2.destination.destinationlist.DestinationListAdapter;
 
 import java.util.ArrayList;
 
-public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, MapFragmentManager.OnDestinationChangeListener {
+public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, MapFragmentManager.OnDestinationChangeListener, DestinationListAdapter.OnDestinationEditListener, MapFragmentManager.OnDescriptionMapClickListener {
 
     public MapFragmentManager mapFragmentManager;
     private MapFragment mapFragment;
@@ -150,7 +157,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         if (id == R.id.nav_camara) {
             loadMapFragment();
         } else if (id == R.id.nav_gallery) {
-            removeMapFragment();
+            loadDestinationsListFragment();
         } else if (id == R.id.nav_slideshow) {
 
         } else if (id == R.id.nav_manage) {
@@ -167,13 +174,16 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     public void loadMapFragment() {
+        loadMapFragment(null);
+    }
+
+    public void loadMapFragment(final LatLng camera) {
         //mapFragment = (MapFragment) getFragmentManager().findFragmentById(R.id.main_fragment);//Afegir mapa
-        if(mapFragment == null) {
-            mapFragment = MapFragment.newInstance();
-        }
+        mapFragment = MapFragment.newInstance();
+
         getFragmentManager().beginTransaction().replace(R.id.main_fragment, mapFragment).commit();
 
-        mapFragmentManager = new MapFragmentManager(this);
+        mapFragmentManager = new MapFragmentManager(this, false);
 
         mapFragment.getMapAsync(mapFragmentManager);
 
@@ -181,6 +191,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             @Override
             public void onMapFragmentReady() {
                 mapFragmentManager.loadMarkers(getDestinationsFromDB());
+                if (camera != null) {
+                    mapFragmentManager.updateCamera(camera);
+                }
             }
         });
     }
@@ -189,7 +202,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         return dbHelper.getAllDestinations();
     }
 
-    public void removeMapFragment() {
+    public void loadDestinationsListFragment() {
         getFragmentManager().beginTransaction().replace(R.id.main_fragment,
                 DestinationList.newInstance(getDestinationsFromDB())).commit();
     }
@@ -202,5 +215,27 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     @Override
     public void onAddedDestination(Destination addedDestination) {
         dbHelper.insertDestination(addedDestination);
+    }
+
+    @Override
+    public void onActiveEdited(String destiantionName, boolean active) {
+        //dbHelper.updateDestination(destiantionName, )
+        Utils.showSToast(active ? "ACTIVATED" : "DEACTIVATED", this);
+    }
+
+    @Override
+    public void onRemoveOREdited(String destiantionName, boolean removeOR) {
+        Utils.showSToast(removeOR ? "ACTIVATED" : "DEACTIVATED", this);
+    }
+
+    @Override
+    public void onDelete(String destinationName) {
+        //@TODO: add a dialog to confirm
+        dbHelper.deleteDestination(destinationName);
+    }
+
+    @Override
+    public void onMapClick(Destination destination) {
+        loadMapFragment(destination.getdLatLng());
     }
 }

@@ -22,7 +22,7 @@
             android:name="com.google.android.maps.v2.API_KEY"
             android:value="AIzaSyB--gP2Dqm0cNtoPLypVtt4dNgisRAGAEY" />
 
-        <service android:name=".DestinationHandle" />
+        <service android:name=".destination.DestinationHandle" />
 
         <activity
             android:name=".MainActivity"

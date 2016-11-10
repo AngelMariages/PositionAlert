@@ -3,7 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context="org.angelmariages.positionalertv2.DestinationList">
+    tools:context="org.angelmariages.positionalertv2.destination.destinationlist.DestinationList">
 
     <ExpandableListView
         android:layout_width="match_parent"

@@ -2,7 +2,6 @@ package org.angelmariages.positionalertv2;
 
 import android.Manifest;
 import android.app.Activity;
-import android.content.DialogInterface;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.support.v4.app.ActivityCompat;
@@ -18,6 +17,9 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
+import org.angelmariages.positionalertv2.destination.Destination;
+import org.angelmariages.positionalertv2.destination.DestinationDialogFragment;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -29,10 +31,27 @@ public class MapFragmentManager implements OnMapReadyCallback {
     private OnMapFragmentReady fragmentReadyListener;
 
     private OnDestinationChangeListener destinationChangeListener;
+    private OnDescriptionMapClickListener descriptionMapClickListener;
 
-    public MapFragmentManager(Activity mapFragmentActivity) {
+    private boolean lite;
+    private Destination destinationGroup = null;
+
+    public MapFragmentManager(Activity mapFragmentActivity, boolean lite) {
+        this.lite = lite;
         if(mapFragmentActivity instanceof OnDestinationChangeListener) {
             destinationChangeListener = (OnDestinationChangeListener) mapFragmentActivity;
+        }
+        this.mapFragmentActivity = mapFragmentActivity;
+    }
+
+    public MapFragmentManager(Activity mapFragmentActivity, boolean lite, Destination destinationGroup) {
+        this.lite = lite;
+        this.destinationGroup = destinationGroup;
+        if(mapFragmentActivity instanceof OnDestinationChangeListener) {
+            destinationChangeListener = (OnDestinationChangeListener) mapFragmentActivity;
+        }
+        if(mapFragmentActivity instanceof OnDescriptionMapClickListener) {
+            descriptionMapClickListener = (OnDescriptionMapClickListener) mapFragmentActivity;
         }
         this.mapFragmentActivity = mapFragmentActivity;
     }
@@ -49,22 +68,33 @@ public class MapFragmentManager implements OnMapReadyCallback {
 
         checkPermissions();
 
-        googleMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
-            @Override
-            public void onMapClick(LatLng latLng) {
-                //TODO: add destination to marker and then query it on the activity with current marker
-                onMapFragmentClick(latLng);
-            }
-        });
+        if(!lite) {
+            googleMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
+                @Override
+                public void onMapClick(LatLng latLng) {
+                    //TODO: add destination to marker and then query it on the activity with current marker
+                    onMapFragmentClick(latLng);
+                }
+            });
 
-        googleMap.setOnInfoWindowClickListener(new GoogleMap.OnInfoWindowClickListener() {
-               @Override
-               public void onInfoWindowClick(Marker marker) {
+            googleMap.setOnInfoWindowClickListener(new GoogleMap.OnInfoWindowClickListener() {
+                                                       @Override
+                                                       public void onInfoWindowClick(Marker marker) {
                    Destination markerDestination = (Destination) marker.getTag();
                    showMarkerDialog(markerDestination.getName(), markerDestination.getRadius(), marker);
+                   }
                }
-           }
-        );
+            );
+        } else {
+            googleMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
+                @Override
+                public void onMapClick(LatLng latLng) {
+                if (destinationGroup != null) {
+                    descriptionMapClickListener.onMapClick(destinationGroup);
+                }
+                }
+            });
+        }
 
         if(fragmentReadyListener != null)
             fragmentReadyListener.onMapFragmentReady();
@@ -130,7 +160,7 @@ public class MapFragmentManager implements OnMapReadyCallback {
                         .position(latLng));
         tmpCircle = googleMap.addCircle(new CircleOptions()
                         .center(latLng)
-                        .radius(200)
+                        .radius(500)
                         .strokeColor(Color.RED)
                         .strokeWidth(5.0f)
                         .fillColor(Color.argb(25, 255, 0, 0)));
@@ -152,8 +182,10 @@ public class MapFragmentManager implements OnMapReadyCallback {
                         radius,
                         destinationName,
                         false,
+                        false,
                         false);
                 marker.setTitle(destinationName);
+                destinationMarkers.get(marker).setRadius(radius);
                 marker.setTag(tmpDestination);
                 marker.showInfoWindow();
 
@@ -183,9 +215,19 @@ public class MapFragmentManager implements OnMapReadyCallback {
         googleMap.setPadding(pxLeft,pxTop,pxRight,pxBottom);
     }
 
+    public Marker addMarker(LatLng position) {
+        return setDestinationMarker(position);
+    }
+
     public void updateCamera(LatLng position) {
         if(googleMap != null) {
             googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(position, 13.0f));
+        }
+    }
+
+    public void setCamera(LatLng position) {
+        if (googleMap != null) {
+            googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(position, 13.0f));
         }
     }
 
@@ -201,7 +243,10 @@ public class MapFragmentManager implements OnMapReadyCallback {
 
     public interface OnDestinationChangeListener {
         void onDeletedDestination(Destination deletedDestination);
-
         void onAddedDestination(Destination addedDestination);
+    }
+
+    public interface OnDescriptionMapClickListener {
+        void onMapClick(Destination destination);
     }
 }

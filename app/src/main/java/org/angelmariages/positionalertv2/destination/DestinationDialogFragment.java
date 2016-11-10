@@ -1,4 +1,4 @@
-package org.angelmariages.positionalertv2;
+package org.angelmariages.positionalertv2.destination;
 
 import android.app.Dialog;
 import android.app.DialogFragment;
@@ -7,6 +7,8 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
+
+import org.angelmariages.positionalertv2.R;
 
 public class DestinationDialogFragment extends DialogFragment {
 
@@ -33,16 +35,6 @@ public class DestinationDialogFragment extends DialogFragment {
         if(destinationText.getText().toString().isEmpty()) {
             if (mListener != null) {
                 mListener.onDeleteClicked();
-            }
-        } else {
-            if(mListener != null) {
-                int radius = 500;
-                try {
-                    radius = Integer.parseInt(destinationRadius.getText().toString());
-                } catch (NumberFormatException e) {
-                    e.printStackTrace();
-                }
-                mListener.onOkClicked(destinationText.getText().toString(), radius);
             }
         }
     }

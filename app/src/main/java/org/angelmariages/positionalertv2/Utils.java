@@ -2,6 +2,7 @@ package org.angelmariages.positionalertv2;
 
 import android.content.Context;
 import android.util.Log;
+import android.view.View;
 import android.widget.Toast;
 
 public abstract class Utils {
@@ -17,6 +18,24 @@ public abstract class Utils {
 
     public static void showLToast(String text, Context context) {
         Toast.makeText(context, text, Toast.LENGTH_LONG).show();
+    }
+
+    public static float getZoomByRadius(int radius) {
+        if(radius < 100)
+            return 17.0f;
+        if(radius < 200)
+            return 15.0f;
+        if(radius < 300)
+            return 14.0f;
+        if(radius < 400)
+            return 13.0f;
+        else
+            return 12.0f;
+    }
+
+    public static int getDipsFromPixels(int pixels, View view) {
+        final float scale = view.getResources().getDisplayMetrics().density;
+        return (int)(pixels * scale + 0.5f);
     }
 
     public static void sendLog(String text) {

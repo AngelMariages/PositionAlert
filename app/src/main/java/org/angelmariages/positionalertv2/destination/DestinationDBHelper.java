@@ -1,4 +1,4 @@
-package org.angelmariages.positionalertv2;
+package org.angelmariages.positionalertv2.destination;
 
 import android.content.ContentValues;
 import android.content.Context;
@@ -8,6 +8,8 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.provider.BaseColumns;
 
 import com.google.android.gms.maps.model.LatLng;
+
+import org.angelmariages.positionalertv2.Utils;
 
 import java.util.ArrayList;
 
@@ -90,6 +92,7 @@ public class DestinationDBHelper extends SQLiteOpenHelper {
                 destRadius,
                 destName,
                 true,
+                false,
                 false);
 
         if(!res.isClosed()) {
@@ -114,6 +117,7 @@ public class DestinationDBHelper extends SQLiteOpenHelper {
                     destRadius,
                     destName,
                     true,
+                    false,
                     false);
             destinations.add(tmp);
             res.moveToNext();
