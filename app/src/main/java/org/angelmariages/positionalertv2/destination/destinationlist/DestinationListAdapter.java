@@ -105,39 +105,50 @@ public class DestinationListAdapter extends BaseExpandableListAdapter {
             TextView latitudeText = (TextView) convertView.findViewById(R.id.latitudeText);
             TextView longitudeText = (TextView) convertView.findViewById(R.id.longitudeText);
             Switch activeSwitch = (Switch) convertView.findViewById(R.id.activeSwitch);
-            Switch removeORSwitch = (Switch) convertView.findViewById(R.id.removeORSwitch);
+            Switch deleteOnReachSwitch = (Switch) convertView.findViewById(R.id.deleteOnReach);
             Button deleteButton = (Button) convertView.findViewById(R.id.destinationDeleteButton);
 
-            radiusText.setText(String.format(context.getString(R.string.radiusText), destinations.get(groupPosition).getRadius()));
-            latitudeText.setText(String.format(context.getString(R.string.latitudeText), destinations.get(groupPosition).getLatitude()));
-            longitudeText.setText(String.format(context.getString(R.string.longitudeText), destinations.get(groupPosition).getLongitude()));
+            final Destination current = destinations.get(groupPosition);
 
-            activeSwitch.setChecked(destinations.get(groupPosition).isActivated());
-            removeORSwitch.setChecked(destinations.get(groupPosition).removeOnReach());
+            radiusText.setText(String.format(context.getString(R.string.radiusText), current.getRadius()));
+            latitudeText.setText(String.format(context.getString(R.string.latitudeText), current.getLatitude()));
+            longitudeText.setText(String.format(context.getString(R.string.longitudeText), current.getLongitude()));
 
-            activeSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            final CompoundButton.OnCheckedChangeListener activeSwitchListener = new CompoundButton.OnCheckedChangeListener() {
                 @Override
                 public void onCheckedChanged(CompoundButton compoundButton, boolean check) {
                     if (mListener != null) {
-                        mListener.onActiveEdited(destinations.get(groupPosition).getName(), check);
+                        mListener.onActiveChanged(current.getDatabaseID(), check);
+                        current.setActivated(check);
                     }
                 }
-            });
+            };
 
-            removeORSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            final CompoundButton.OnCheckedChangeListener deleteOnReachListener = new CompoundButton.OnCheckedChangeListener() {
                 @Override
                 public void onCheckedChanged(CompoundButton compoundButton, boolean check) {
                     if (mListener != null) {
-                        mListener.onRemoveOREdited(destinations.get(groupPosition).getName(), check);
+                        mListener.onDeleteOnReachChanged(current.getDatabaseID(), check);
+                        current.setRemoveOnReach(check);
                     }
                 }
-            });
+            };
+
+            activeSwitch.setOnCheckedChangeListener(null);
+            deleteOnReachSwitch.setOnCheckedChangeListener(null);
+
+            activeSwitch.setChecked(current.active());
+            deleteOnReachSwitch.setChecked(current.removeOnReach());
+
+            activeSwitch.setOnCheckedChangeListener(activeSwitchListener);
+
+            deleteOnReachSwitch.setOnCheckedChangeListener(deleteOnReachListener);
 
             deleteButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
                     if (mListener != null) {
-                        mListener.onDelete(destinations.get(groupPosition).getName());
+                        mListener.onDelete(current.getDatabaseID());
                         destinations.remove(groupPosition);
                         notifyDataSetChanged();
                     }
@@ -185,8 +196,8 @@ public class DestinationListAdapter extends BaseExpandableListAdapter {
     }
 
     public interface OnDestinationEditListener {
-        void onActiveEdited(String destiantionName, boolean active);
-        void onRemoveOREdited(String destiantionName, boolean removeOR);
-        void onDelete(String destinationName);
+        void onActiveChanged(int destinationID, boolean active);
+        void onDeleteOnReachChanged(int destinationID, boolean deleteOnReach);
+        void onDelete(int destinationID);
     }
 }

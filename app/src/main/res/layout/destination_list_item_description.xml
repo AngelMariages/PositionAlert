@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:id="@+id/destinationDescLayout"
+              android:layout_width="match_parent"
+              android:layout_height="wrap_content"
+              android:orientation="vertical"
+              android:paddingLeft="26dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="horizontal">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1.0"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/radiusText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/radiusText"/>
+
+            <TextView
+                android:id="@+id/latitudeText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/latitudeText"/>
+
+            <TextView
+                android:id="@+id/longitudeText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/longitudeText"/>
+
+            <Switch
+                android:id="@+id/activeSwitch"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/activeSwitch"/>
+
+            <Switch
+                android:id="@+id/deleteOnReach"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/deleteOnReachSwitch"/>
+        </LinearLayout>
+
+        <Button
+            android:id="@+id/destinationDeleteButton"
+            style="@style/Widget.AppCompat.Button.Colored"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:text="@string/destinationDeleteButton"/>
+    </LinearLayout>
+
+    <FrameLayout
+        android:id="@+id/destinationDescriptionMap"
+        android:layout_width="match_parent"
+        android:layout_height="206dp"/>
+</LinearLayout>

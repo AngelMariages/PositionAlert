@@ -4,11 +4,12 @@
     android:layout_height="match_parent">
 
     <TextView
-        android:text="TextView"
         android:layout_width="match_parent"
         android:id="@+id/destinationText"
         android:paddingLeft="14.5dp"
-        android:textAppearance="@android:style/TextAppearance.Material.Large"
+        android:paddingStart="14.5dp"
+        android:paddingEnd="14.5dp"
         android:layout_height="32dp"
-        android:gravity="center_vertical" />
+        android:gravity="center_vertical"
+        android:textAppearance="@style/TextAppearance.AppCompat.Widget.Switch"/>
 </LinearLayout>

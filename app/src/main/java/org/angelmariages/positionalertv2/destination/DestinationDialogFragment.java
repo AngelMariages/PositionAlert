@@ -68,9 +68,7 @@ public class DestinationDialogFragment extends DialogFragment {
                         int radius = 500;
                         try {
                             radius = Integer.parseInt(destinationRadius.getText().toString());
-                        } catch (NumberFormatException e) {
-                            e.printStackTrace();
-                        }
+                        } catch (NumberFormatException ignored) {}
                         mListener.onOkClicked(destinationText.getText().toString(), radius);
                     }
                     customDialog.dismiss();

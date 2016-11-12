@@ -1,6 +1,8 @@
 package org.angelmariages.positionalertv2.destination;
 
 import android.app.IntentService;
+import android.app.Notification;
+import android.app.NotificationManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -8,11 +10,13 @@ import android.media.MediaPlayer;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Looper;
+import android.support.v4.app.NotificationCompat;
 
 import com.google.android.gms.location.Geofence;
 import com.google.android.gms.location.GeofencingEvent;
 import com.google.android.gms.location.GeofencingRequest;
 
+import org.angelmariages.positionalertv2.R;
 import org.angelmariages.positionalertv2.Utils;
 
 import java.io.IOException;
@@ -52,7 +56,20 @@ public class DestinationHandle extends IntentService {
                 ringtoneSaved = RingtoneManager.EXTRA_RINGTONE_DEFAULT_URI;
             }
 
-            try {
+            NotificationManager notificationManager =
+                    (NotificationManager) this.getSystemService(Context.NOTIFICATION_SERVICE);
+
+            Notification notification = new NotificationCompat.Builder(this)
+                    .setSmallIcon(R.mipmap.ic_launcher)
+                    .setContentTitle("Reached destination!")
+                    .setContentText("Geofence!")
+                    .setStyle(new NotificationCompat.BigTextStyle().bigText("LAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"))
+                    .setPriority(NotificationCompat.PRIORITY_HIGH)
+                    .setAutoCancel(true)
+                    .build();
+            notificationManager.notify(0, notification);
+
+            /*try {
                 MediaPlayer mediaPlayer = new MediaPlayer();
                 mediaPlayer.setDataSource(this, Uri.parse(ringtoneSaved));
                 mediaPlayer.prepare();
@@ -67,7 +84,7 @@ public class DestinationHandle extends IntentService {
                 });
             } catch(IOException e) {
                 e.printStackTrace();
-            }
+            }*/
 
         }
     }

@@ -12,5 +12,5 @@
     <string name="longitudeText">Longitude: %f</string>
     <string name="destinationDeleteButton">Delete</string>
     <string name="activeSwitch">Active:</string>
-    <string name="removeORSwitch">Remove on reach:</string>
+    <string name="deleteOnReachSwitch">Delete on reach:</string>
 </resources>

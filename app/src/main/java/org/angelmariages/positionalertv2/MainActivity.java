@@ -35,6 +35,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     private DestinationManager destinationManager;
     private final DestinationDBHelper dbHelper = new DestinationDBHelper(this);
+    private NavigationView navigationView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,36 +47,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);//Afegir Toolbar de dalt
         setSupportActionBar(toolbar);
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);//Boto flotant
-
         destinationManager = new DestinationManager(this.getApplicationContext());
 
         openOrCreateDatabase("MyDestinations.db", MODE_PRIVATE, null);
-
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-
-                /**
-                    @TODO: add snackbar when removing the fence
-                    mapFragmentManager.setMapFragmentPadding(0, 0, 0, 48);
-                    Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                            .setAction("Action", new View.OnClickListener() {
-                                @Override
-                                public void onClick(View v) {
-                                    mapFragmentManager.setMapFragmentPadding(0, 0, 0, 0);
-                                }
-                            }).show();
-
-                    new Handler().postDelayed(new Runnable() {
-                        @Override
-                        public void run() {
-                            mapFragmentManager.setMapFragmentPadding(0, 0, 0, 0);
-                        }
-                    }, 2900);
-                */
-            }
-        });
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
@@ -83,7 +57,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         drawer.addDrawerListener(toggle);
         toggle.syncState();
 
-        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);//Afegir panell de l'esquerra de nav
+        navigationView = (NavigationView) findViewById(R.id.nav_view);//Afegir panell de l'esquerra de nav
         navigationView.setNavigationItemSelectedListener(this);
     }
 
@@ -158,14 +132,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             loadMapFragment();
         } else if (id == R.id.nav_gallery) {
             loadDestinationsListFragment();
-        } else if (id == R.id.nav_slideshow) {
-
-        } else if (id == R.id.nav_manage) {
-
-        } else if (id == R.id.nav_share) {
-
-        } else if (id == R.id.nav_send) {
-
         }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -178,7 +144,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     public void loadMapFragment(final LatLng camera) {
-        //mapFragment = (MapFragment) getFragmentManager().findFragmentById(R.id.main_fragment);//Afegir mapa
         mapFragment = MapFragment.newInstance();
 
         getFragmentManager().beginTransaction().replace(R.id.main_fragment, mapFragment).commit();
@@ -196,6 +161,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 }
             }
         });
+
+        if(navigationView != null) {
+            navigationView.getMenu().getItem(0).setChecked(true);
+        }
     }
 
     private ArrayList<Destination> getDestinationsFromDB() {
@@ -205,37 +174,42 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     public void loadDestinationsListFragment() {
         getFragmentManager().beginTransaction().replace(R.id.main_fragment,
                 DestinationList.newInstance(getDestinationsFromDB())).commit();
+
+        mapFragment = null;
+        mapFragmentManager = null;
     }
 
     @Override
     public void onDeletedDestination(Destination deletedDestination) {
-        dbHelper.deleteDestination(deletedDestination.getName());
+        dbHelper.deleteDestination(deletedDestination.getDatabaseID());
+        destinationManager.removeDestination(deletedDestination.hashCode());
     }
 
     @Override
     public void onAddedDestination(Destination addedDestination) {
         dbHelper.insertDestination(addedDestination);
+        destinationManager.addDestination(addedDestination);
     }
 
     @Override
-    public void onActiveEdited(String destiantionName, boolean active) {
-        //dbHelper.updateDestination(destiantionName, )
+    public void onActiveChanged(int destinationID, boolean active) {
+        dbHelper.updateValue(destinationID, DestinationDBHelper.COLUMN_ACTIVE, active);
         Utils.showSToast(active ? "ACTIVATED" : "DEACTIVATED", this);
     }
 
     @Override
-    public void onRemoveOREdited(String destiantionName, boolean removeOR) {
-        Utils.showSToast(removeOR ? "ACTIVATED" : "DEACTIVATED", this);
+    public void onDeleteOnReachChanged(int destinationID, boolean deleteOnReach) {
+        dbHelper.updateValue(destinationID, DestinationDBHelper.COLUMN_DELETEONREACH, deleteOnReach);
+        Utils.showSToast(deleteOnReach ? "Destination will be deleted when reached" : "Destination will be kept when reached", this);
     }
 
     @Override
-    public void onDelete(String destinationName) {
-        //@TODO: add a dialog to confirm
-        dbHelper.deleteDestination(destinationName);
+    public void onDelete(int destinationID) {
+        dbHelper.deleteDestination(destinationID);
     }
 
     @Override
-    public void onMapClick(Destination destination) {
+    public void onMapDescriptionClick(Destination destination) {
         loadMapFragment(destination.getdLatLng());
     }
 }

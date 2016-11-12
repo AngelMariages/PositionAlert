@@ -19,7 +19,6 @@ import org.angelmariages.positionalertv2.Utils;
 import java.util.ArrayList;
 
 public class DestinationManager implements ResultCallback<Status> {
-    private ArrayList<Geofence> mGeofences = new ArrayList<>();
     private GoogleApiClient mGoogleApiClient;
     private Context mContext;
     private LocationApiClient mLocationApiClient;
@@ -37,7 +36,7 @@ public class DestinationManager implements ResultCallback<Status> {
             @Override
             public void onTick(long l) {
                 if (!done && mLocationApiClient.isConnected()) {
-                    addGeofences(destination);
+                    addGeofence(destination);
                     done = true;
                 } else if(!done) {
                     Utils.sendLog("Waiting for api to connect");
@@ -51,25 +50,23 @@ public class DestinationManager implements ResultCallback<Status> {
         }.start();
     }
 
-    private void addGeofences(Destination destination) {
+    private void addGeofence(Destination destination) {
         try {
-            mGeofences.add(new Geofence.Builder()
-                    .setRequestId(destination.getName())
+            Geofence addedGeofence = new Geofence.Builder()
+                    .setRequestId(String.valueOf(destination.hashCode()))
                     .setCircularRegion(destination.getLatitude(),
                             destination.getLongitude(),
                             destination.getRadius())
                     .setExpirationDuration(Geofence.NEVER_EXPIRE)
-                    .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_ENTER |
-                            Geofence.GEOFENCE_TRANSITION_EXIT)
+                    .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_ENTER)
                     .setNotificationResponsiveness(1000)
-                    .build());
+                    .build();
 
             LocationServices.GeofencingApi.addGeofences(
                     mGoogleApiClient,
-                    getGeofenceRequest(),
+                    getGeofenceRequest(addedGeofence),
                     getGeofencePendingIntent()
             ).setResultCallback(this);
-            Utils.sendLog("Succes!");
         } catch (SecurityException e) {
             Utils.sendLog("Error adding Geofence, SecurityException");
             e.printStackTrace();
@@ -84,15 +81,16 @@ public class DestinationManager implements ResultCallback<Status> {
                 PendingIntent.FLAG_UPDATE_CURRENT);
     }
 
-    private GeofencingRequest getGeofenceRequest() {
+    private GeofencingRequest getGeofenceRequest(Geofence addedGeofence) {
         return new GeofencingRequest.Builder()
                 .setInitialTrigger(GeofencingRequest.INITIAL_TRIGGER_ENTER)
-                .addGeofences(mGeofences)
+                .addGeofence(addedGeofence)
                 .build();
     }
 
-    public void removeDestination(final String destinationRequestId) {
+    public void removeDestination(final int destinationHashcode) {
         if(!mGoogleApiClient.isConnected()) {
+            //TODO: keep trying to remove geofence
             Utils.sendLog("Error removing Geofence, GoogleApiClient not connected");
             return;
         }
@@ -101,7 +99,7 @@ public class DestinationManager implements ResultCallback<Status> {
             LocationServices.GeofencingApi.removeGeofences(
                     mGoogleApiClient,
                     new ArrayList<String>(){{
-                        add(destinationRequestId);
+                        add(String.valueOf(destinationHashcode));
                     }}
             ).setResultCallback(this);
         } catch(SecurityException e) {
