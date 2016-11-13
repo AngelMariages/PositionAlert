@@ -19,9 +19,9 @@ import org.angelmariages.positionalertv2.Utils;
 import java.util.ArrayList;
 
 public class DestinationManager implements ResultCallback<Status> {
-    private GoogleApiClient mGoogleApiClient;
-    private Context mContext;
-    private LocationApiClient mLocationApiClient;
+    private final GoogleApiClient mGoogleApiClient;
+    private final Context mContext;
+    private final LocationApiClient mLocationApiClient;
 
     public DestinationManager(Context context) {
         this.mContext = context;
@@ -53,7 +53,7 @@ public class DestinationManager implements ResultCallback<Status> {
     private void addGeofence(Destination destination) {
         try {
             Geofence addedGeofence = new Geofence.Builder()
-                    .setRequestId(String.valueOf(destination.hashCode()))
+                    .setRequestId(destination.generateID())
                     .setCircularRegion(destination.getLatitude(),
                             destination.getLongitude(),
                             destination.getRadius())
@@ -67,6 +67,8 @@ public class DestinationManager implements ResultCallback<Status> {
                     getGeofenceRequest(addedGeofence),
                     getGeofencePendingIntent()
             ).setResultCallback(this);
+            Utils.sendLog("Adding geofence["+ destination.generateID() +"] from destination:");
+            Utils.sendLog(destination.toString());
         } catch (SecurityException e) {
             Utils.sendLog("Error adding Geofence, SecurityException");
             e.printStackTrace();
@@ -83,12 +85,12 @@ public class DestinationManager implements ResultCallback<Status> {
 
     private GeofencingRequest getGeofenceRequest(Geofence addedGeofence) {
         return new GeofencingRequest.Builder()
-                .setInitialTrigger(GeofencingRequest.INITIAL_TRIGGER_ENTER)
+                .setInitialTrigger(GeofencingRequest.INITIAL_TRIGGER_EXIT)
                 .addGeofence(addedGeofence)
                 .build();
     }
 
-    public void removeDestination(final int destinationHashcode) {
+    public void removeDestination(final String destinationString) {
         if(!mGoogleApiClient.isConnected()) {
             //TODO: keep trying to remove geofence
             Utils.sendLog("Error removing Geofence, GoogleApiClient not connected");
@@ -99,9 +101,10 @@ public class DestinationManager implements ResultCallback<Status> {
             LocationServices.GeofencingApi.removeGeofences(
                     mGoogleApiClient,
                     new ArrayList<String>(){{
-                        add(String.valueOf(destinationHashcode));
+                        add(destinationString);
                     }}
             ).setResultCallback(this);
+            Utils.sendLog("Removing geofence[" + destinationString + "]...");
         } catch(SecurityException e) {
             Utils.sendLog("Error removing Geofence, SecurityException");
             e.printStackTrace();
@@ -111,7 +114,7 @@ public class DestinationManager implements ResultCallback<Status> {
     @Override
     public void onResult(@NonNull Status status) {
         if(status.isSuccess()) {
-            Utils.sendLog("Sucess:" + status.getStatusMessage());
+            Utils.sendLog("Sucess!");
         } else {
             Utils.sendLog("Error: " + status.getStatusMessage());
         }

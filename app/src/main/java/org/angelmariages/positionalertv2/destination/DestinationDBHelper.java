@@ -5,28 +5,26 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-import android.provider.BaseColumns;
 
 import com.google.android.gms.maps.model.LatLng;
 
-import java.util.ArrayList;
-import java.util.Objects;
+import org.angelmariages.positionalertv2.Utils;
 
-import static android.R.attr.name;
+import java.util.ArrayList;
 
 public class DestinationDBHelper extends SQLiteOpenHelper {
 
     private static final String DATABASE_NAME = "MyDestinations.db";
     private static final String DESTINATIONS_TABLE = "destinations";
 
-    public static final String COLUMN_ID = "id";
-    public static final String COLUMN_NAME = "name";
-    public static final String COLUMN_LAT = "latitude";
-    public static final String COLUMN_LONG = "longitude";
-    public static final String COLUMN_RADIUS = "radius";
+    private static final String COLUMN_ID = "id";
+    private static final String COLUMN_NAME = "name";
+    private static final String COLUMN_LAT = "latitude";
+    private static final String COLUMN_LONG = "longitude";
+    private static final String COLUMN_RADIUS = "radius";
     public static final String COLUMN_ACTIVE = "active";
     public static final String COLUMN_DELETEONREACH = "deleteonreach";
-    public static final String COLUMN_REGISTERED = "registered";
+    private static final String COLUMN_REGISTERED = "registered";
 
     private static final String[] columnNames = new String[]{
             COLUMN_ID,
@@ -41,6 +39,7 @@ public class DestinationDBHelper extends SQLiteOpenHelper {
 
     public DestinationDBHelper(Context context) {
         super(context, DATABASE_NAME, null, 1);
+        context.openOrCreateDatabase(DATABASE_NAME, Context.MODE_PRIVATE, null);
     }
 
     @Override
@@ -54,6 +53,7 @@ public class DestinationDBHelper extends SQLiteOpenHelper {
                 COLUMN_ACTIVE + " BOOLEAN, " +
                 COLUMN_DELETEONREACH + " BOOLEAN, " +
                 COLUMN_REGISTERED + " BOOLEAN)");
+        Utils.sendLog("Creating destinations database");
     }
 
     @Override
@@ -79,7 +79,11 @@ public class DestinationDBHelper extends SQLiteOpenHelper {
         content.put(COLUMN_DELETEONREACH, destination.removeOnReach());
         content.put(COLUMN_REGISTERED, destination.registered());
 
-        return db.insert(DESTINATIONS_TABLE, null, content);
+        Utils.sendLog("Inserting destination to database");
+
+        long result = db.insert(DESTINATIONS_TABLE, null, content);
+        db.close();
+        return result;
     }
 
     public int updateDestination(int destinationID, Destination destination) {
@@ -94,7 +98,9 @@ public class DestinationDBHelper extends SQLiteOpenHelper {
         content.put(COLUMN_DELETEONREACH, destination.removeOnReach());
         content.put(COLUMN_REGISTERED, destination.registered());
 
-        return db.update(DESTINATIONS_TABLE, content, "id = ?", new String[]{String.valueOf(destinationID)});
+        int result = db.update(DESTINATIONS_TABLE, content, "id = ?", new String[]{String.valueOf(destinationID)});
+        db.close();
+        return result;
     }
 
     public int updateValue(int destinationID, String column, String value) {
@@ -103,7 +109,9 @@ public class DestinationDBHelper extends SQLiteOpenHelper {
 
         content.put(column, value);
 
-        return db.update(DESTINATIONS_TABLE, content, "id = ?", new String[]{String.valueOf(destinationID)});
+        int result = db.update(DESTINATIONS_TABLE, content, "id = ?", new String[]{String.valueOf(destinationID)});
+        db.close();
+        return result;
     }
 
     public int updateValue(int destinationID, String column, int value) {
@@ -112,7 +120,9 @@ public class DestinationDBHelper extends SQLiteOpenHelper {
 
         content.put(column, value);
 
-        return db.update(DESTINATIONS_TABLE, content, "id = ?", new String[]{String.valueOf(destinationID)});
+        int result = db.update(DESTINATIONS_TABLE, content, "id = ?", new String[]{String.valueOf(destinationID)});
+        db.close();
+        return result;
     }
 
     public int updateValue(int destinationID, String column, boolean value) {
@@ -121,17 +131,35 @@ public class DestinationDBHelper extends SQLiteOpenHelper {
 
         content.put(column, value);
 
-        return db.update(DESTINATIONS_TABLE, content, "id = ?", new String[]{String.valueOf(destinationID)});
+        int result = db.update(DESTINATIONS_TABLE, content, "id = ?", new String[]{String.valueOf(destinationID)});
+        db.close();
+        return result;
+    }
+
+    public int updateLatLng(int destinationID, LatLng newLatLng) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues content = new ContentValues();
+
+        content.put(COLUMN_LAT, newLatLng.latitude);
+        content.put(COLUMN_LONG, newLatLng.longitude);
+
+        int result = db.update(DESTINATIONS_TABLE, content, "id = ?", new String[]{String.valueOf(destinationID)});
+        db.close();
+        return result;
     }
 
     public int deleteDestination(int destinationID) {
         SQLiteDatabase db = this.getWritableDatabase();
-        return db.delete(DESTINATIONS_TABLE, "id = ?", new String[]{String.valueOf(destinationID)});
+        int result = db.delete(DESTINATIONS_TABLE, "id = ?", new String[]{String.valueOf(destinationID)});
+        db.close();
+        return result;
     }
 
     public Destination getDestination(int destinationID) {
         SQLiteDatabase db = this.getReadableDatabase();
         Cursor res = db.query(DESTINATIONS_TABLE, columnNames, "id = ?", new String[]{String.valueOf(destinationID)}, null, null, null, null);
+
+        Utils.sendLog("Getting destination: " + destinationID);
 
         res.moveToFirst();
         int destID = res.getInt(res.getColumnIndex(COLUMN_ID));

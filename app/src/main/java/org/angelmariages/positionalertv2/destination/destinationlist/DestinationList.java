@@ -15,7 +15,6 @@ import org.angelmariages.positionalertv2.R;
 import org.angelmariages.positionalertv2.Utils;
 
 import java.util.ArrayList;
-import java.util.concurrent.atomic.AtomicInteger;
 
 public class DestinationList extends Fragment {
     private int lastExpandedGroupId = -1;
@@ -57,9 +56,8 @@ public class DestinationList extends Fragment {
         setIndicatorBounds(view, destinationsListView);
 
         DestinationListAdapter destinationListAdapter = new DestinationListAdapter(view.getContext(),
-                destinations,
-                R.layout.destination_list_item_title,
-                R.layout.destination_list_item_description);
+                destinations
+        );
 
         destinationsListView.setAdapter(destinationListAdapter);
 

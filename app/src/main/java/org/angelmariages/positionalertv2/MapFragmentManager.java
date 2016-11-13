@@ -24,28 +24,28 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 public class MapFragmentManager implements OnMapReadyCallback {
-    private Activity mapFragmentActivity;
+    private final Activity mapFragmentActivity;
     private GoogleMap googleMap;
 
-    private HashMap<Marker, Circle> destinationMarkers = new HashMap<>();
+    private final HashMap<Marker, Circle> destinationMarkers = new HashMap<>();
     private OnMapFragmentReady fragmentReadyListener;
 
     private OnDestinationChangeListener destinationChangeListener;
     private OnDescriptionMapClickListener descriptionMapClickListener;
 
-    private boolean lite;
+    private final boolean lite;
     private Destination destinationGroup = null;
 
-    public MapFragmentManager(Activity mapFragmentActivity, boolean lite) {
-        this.lite = lite;
+    public MapFragmentManager(Activity mapFragmentActivity) {
+        this.lite = false;
         if(mapFragmentActivity instanceof OnDestinationChangeListener) {
             destinationChangeListener = (OnDestinationChangeListener) mapFragmentActivity;
         }
         this.mapFragmentActivity = mapFragmentActivity;
     }
 
-    public MapFragmentManager(Activity mapFragmentActivity, boolean lite, Destination destinationGroup) {
-        this.lite = lite;
+    public MapFragmentManager(Activity mapFragmentActivity, Destination destinationGroup) {
+        this.lite = true;
         this.destinationGroup = destinationGroup;
         if(mapFragmentActivity instanceof OnDestinationChangeListener) {
             destinationChangeListener = (OnDestinationChangeListener) mapFragmentActivity;
@@ -58,7 +58,7 @@ public class MapFragmentManager implements OnMapReadyCallback {
 
     public void loadMarkers(ArrayList<Destination> destinations) {
         for(Destination destination : destinations) {
-            setDestinationMarker(destination);
+            setDestinationMarker(destination, false);
         }
     }
 
@@ -85,6 +85,24 @@ public class MapFragmentManager implements OnMapReadyCallback {
                    }
                }
             );
+
+            googleMap.setOnMarkerDragListener(new GoogleMap.OnMarkerDragListener() {
+
+                @Override
+                public void onMarkerDragStart(Marker marker) {
+                }
+
+                @Override
+                public void onMarkerDrag(Marker marker) {
+                    destinationMarkers.get(marker).setCenter(marker.getPosition());
+                }
+
+                @Override
+                public void onMarkerDragEnd(Marker marker) {
+                    if(destinationChangeListener != null)
+                        destinationChangeListener.onMovedDestination(marker.getPosition(), ((Destination)marker.getTag()).getDatabaseID());
+                }
+            });
         } else {
             googleMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
                 @Override
@@ -107,23 +125,6 @@ public class MapFragmentManager implements OnMapReadyCallback {
 
         if(fragmentReadyListener != null)
             fragmentReadyListener.onMapFragmentReady();
-
-        /*googleMap.setOnMarkerDragListener(new GoogleMap.OnMarkerDragListener() {
-
-            @Override
-            public void onMarkerDragStart(Marker marker) {
-            }
-
-            @Override
-            public void onMarkerDrag(Marker marker) {
-                destinationMarkers.get(marker).setCenter(marker.getPosition());
-            }
-
-            @Override
-            public void onMarkerDragEnd(Marker marker) {
-
-            }
-        });*/
     }
 
     private void checkPermissions() {
@@ -144,20 +145,23 @@ public class MapFragmentManager implements OnMapReadyCallback {
         setDestinationMarker(latLng);
     }
 
-    private Marker setDestinationMarker(Destination destination) {
+    private Marker setDestinationMarker(Destination destination, boolean showInfoWindow) {
         Marker tmpMarker;
         Circle tmpCircle;
         tmpMarker = googleMap.addMarker(new MarkerOptions()
                 .position(destination.getdLatLng())
+                .draggable(true)
                 .title(destination.getName()));
         tmpMarker.setTag(destination);
+        if(showInfoWindow) {
+            tmpMarker.showInfoWindow();
+        }
         tmpCircle = googleMap.addCircle(new CircleOptions()
                 .center(destination.getdLatLng())
                 .radius(destination.getRadius())
                 .strokeColor(Color.RED)
                 .strokeWidth(5.0f)
                 .fillColor(Color.argb(25, 255, 0, 0)));
-        tmpMarker.showInfoWindow();
         destinationMarkers.put(tmpMarker, tmpCircle);
         return tmpMarker;
     }
@@ -166,14 +170,14 @@ public class MapFragmentManager implements OnMapReadyCallback {
         Marker tmpMarker;
         Circle tmpCircle;
         tmpMarker = googleMap.addMarker(new MarkerOptions()
-                .position(latLng));
+                .position(latLng)
+                .draggable(true));
         tmpCircle = googleMap.addCircle(new CircleOptions()
                 .center(latLng)
                 .radius(500)
                 .strokeColor(Color.RED)
                 .strokeWidth(5.0f)
                 .fillColor(Color.argb(25, 255, 0, 0)));
-        tmpMarker.showInfoWindow();
         showMarkerDialog(null, 0, tmpMarker);
         destinationMarkers.put(tmpMarker, tmpCircle);
         return tmpMarker;
@@ -187,18 +191,24 @@ public class MapFragmentManager implements OnMapReadyCallback {
         destinationDialogFragment.setOnDestinationDialogListener(new DestinationDialogFragment.OnDestinationDialogListener() {
             @Override
             public void onOkClicked(String destinationName, int radius) {
-                Destination tmpDestination = new Destination(-1,
+                final Destination tmpDestination = new Destination(-1,
                         destinationName,
                         marker.getPosition(),
                         radius,
+                        true,
                         false,
-                        false,
-                        false
+                        true
                 );
                 marker.setTitle(destinationName);
                 destinationMarkers.get(marker).setRadius(radius);
-                marker.setTag(tmpDestination);
                 marker.showInfoWindow();
+                ((MainActivity) mapFragmentActivity).setOnDestinationAddedToDBListener(new MainActivity.OnDestinationAddedToDBListener() {
+                    @Override
+                    public void onDestinationAdded(int destinationID) {
+                        tmpDestination.setDatabaseID(destinationID);
+                        marker.setTag(tmpDestination);
+                    }
+                });
 
                 if(destinationChangeListener != null)
                     destinationChangeListener.onAddedDestination(tmpDestination);
@@ -207,7 +217,7 @@ public class MapFragmentManager implements OnMapReadyCallback {
             @Override
             public void onDeleteClicked() {
                 if(destinationChangeListener != null && marker.getTag() != null)
-                    destinationChangeListener.onDeletedDestination((Destination) marker.getTag());
+                    destinationChangeListener.onDeletedDestination(((Destination)marker.getTag()).getDatabaseID());
                 destinationMarkers.get(marker).remove();
                 marker.remove();
             }
@@ -226,8 +236,8 @@ public class MapFragmentManager implements OnMapReadyCallback {
         googleMap.setPadding(pxLeft, pxTop, pxRight, pxBottom);
     }
 
-    public Marker addMarker(LatLng position) {
-        return setDestinationMarker(position);
+    public void addMarker(Destination destination) {
+        setDestinationMarker(destination, true);
     }
 
     public void updateCamera(LatLng position) {
@@ -253,9 +263,9 @@ public class MapFragmentManager implements OnMapReadyCallback {
     }
 
     public interface OnDestinationChangeListener {
-        void onDeletedDestination(Destination deletedDestination);
-
+        void onDeletedDestination(int destinationID);
         void onAddedDestination(Destination addedDestination);
+        void onMovedDestination(LatLng newPosition, int destinationID);
     }
 
     public interface OnDescriptionMapClickListener {

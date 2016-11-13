@@ -1,6 +1,5 @@
 package org.angelmariages.positionalertv2;
 
-import android.app.Activity;
 import android.content.Context;
 import android.location.Location;
 import android.os.Bundle;

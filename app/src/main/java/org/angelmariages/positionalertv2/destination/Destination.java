@@ -63,7 +63,7 @@ public class Destination implements Serializable {
         return removeOnReach;
     }
 
-    public void setRemoveOnReach(boolean removeOnReach) {
+    public void setDeleteOnReach(boolean removeOnReach) {
         this.removeOnReach = removeOnReach;
     }
 
@@ -113,5 +113,11 @@ public class Destination implements Serializable {
 
     public void setActivated(boolean activated) {
         this.activated = activated;
+    }
+
+    public String generateID() {
+        return databaseID + "|@|" +
+                name + "|@|" +
+                removeOnReach;
     }
 }

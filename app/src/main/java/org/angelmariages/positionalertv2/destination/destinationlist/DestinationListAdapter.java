@@ -30,7 +30,7 @@ public class DestinationListAdapter extends BaseExpandableListAdapter {
 
     private OnDestinationEditListener mListener;
 
-    public DestinationListAdapter(Context context, ArrayList<Destination> destinations, int groupLayout, int childLayout) {
+    public DestinationListAdapter(Context context, ArrayList<Destination> destinations) {
         if(context instanceof OnDestinationEditListener) {
             mListener = (OnDestinationEditListener) context;
         } else {
@@ -39,8 +39,8 @@ public class DestinationListAdapter extends BaseExpandableListAdapter {
         }
         this.context = context;
         this.destinations = destinations;
-        this.groupLayout = groupLayout;
-        this.childLayout = childLayout;
+        this.groupLayout = R.layout.destination_list_item_title;
+        this.childLayout = R.layout.destination_list_item_description;
     }
 
     @Override
@@ -129,7 +129,7 @@ public class DestinationListAdapter extends BaseExpandableListAdapter {
                 public void onCheckedChanged(CompoundButton compoundButton, boolean check) {
                     if (mListener != null) {
                         mListener.onDeleteOnReachChanged(current.getDatabaseID(), check);
-                        current.setRemoveOnReach(check);
+                        current.setDeleteOnReach(check);
                     }
                 }
             };
@@ -172,16 +172,14 @@ public class DestinationListAdapter extends BaseExpandableListAdapter {
         activity.getFragmentManager().beginTransaction()
                 .replace(R.id.destinationDescriptionMap, mapFragment).commit();
 
-        final MapFragmentManager mapFragmentManager = new MapFragmentManager(activity, true, destinations.get(groupPosition));
+        final MapFragmentManager mapFragmentManager = new MapFragmentManager(activity, destinations.get(groupPosition));
 
         mapFragment.getMapAsync(mapFragmentManager);
 
         mapFragmentManager.setOnMapFragmentReady(new MapFragmentManager.OnMapFragmentReady() {
             @Override
             public void onMapFragmentReady() {
-                mapFragmentManager.loadMarkers(new ArrayList<Destination>(){{
-                    add(destinations.get(groupPosition));
-                }});
+                mapFragmentManager.addMarker(destinations.get(groupPosition));
             }
         });
     }

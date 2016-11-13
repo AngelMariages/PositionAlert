@@ -24,8 +24,7 @@
             android:id="@+id/destinationNameEdit"
             android:hint="My first destination"
             android:layout_weight="1"
-            android:maxLines="1"
-            android:autoText="true" />
+            android:maxLines="1" />
     </LinearLayout>
 
     <LinearLayout

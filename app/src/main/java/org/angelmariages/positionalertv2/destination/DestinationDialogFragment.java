@@ -5,6 +5,7 @@ import android.app.DialogFragment;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.TextView;
 
@@ -40,6 +41,14 @@ public class DestinationDialogFragment extends DialogFragment {
     }
 
     @Override
+    public void onActivityCreated(Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+        if(getDialog().getWindow() != null) {
+            getDialog().getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
+        }
+    }
+
+    @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         String destinationName = getArguments().getString("DESTINATION_NAME");
         int radius = getArguments().getInt("DESTINATION_RADIUS");
@@ -70,8 +79,8 @@ public class DestinationDialogFragment extends DialogFragment {
                             radius = Integer.parseInt(destinationRadius.getText().toString());
                         } catch (NumberFormatException ignored) {}
                         mListener.onOkClicked(destinationText.getText().toString(), radius);
+                        customDialog.dismiss();
                     }
-                    customDialog.dismiss();
                 }
             }
         });
@@ -81,8 +90,8 @@ public class DestinationDialogFragment extends DialogFragment {
             public void onClick(View view) {
                 if(mListener != null) {
                     mListener.onDeleteClicked();
+                    customDialog.dismiss();
                 }
-                customDialog.dismiss();
             }
         });
 

@@ -6,8 +6,7 @@ import android.media.Ringtone;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
-import android.view.View;
+import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -30,17 +29,20 @@ import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, MapFragmentManager.OnDestinationChangeListener, DestinationListAdapter.OnDestinationEditListener, MapFragmentManager.OnDescriptionMapClickListener {
 
-    public MapFragmentManager mapFragmentManager;
+    private MapFragmentManager mapFragmentManager;
     private MapFragment mapFragment;
 
     private DestinationManager destinationManager;
-    private final DestinationDBHelper dbHelper = new DestinationDBHelper(this);
+    private DestinationDBHelper dbHelper;
     private NavigationView navigationView;
+    private OnDestinationAddedToDBListener mListener;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        dbHelper = new DestinationDBHelper(this);
 
         loadMapFragment();
 
@@ -48,8 +50,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         setSupportActionBar(toolbar);
 
         destinationManager = new DestinationManager(this.getApplicationContext());
-
-        openOrCreateDatabase("MyDestinations.db", MODE_PRIVATE, null);
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
@@ -124,7 +124,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     @Override
-    public boolean onNavigationItemSelected(MenuItem item) {
+    public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         // Handle navigation view item clicks here.
         int id = item.getItemId();
 
@@ -139,16 +139,16 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         return true;
     }
 
-    public void loadMapFragment() {
+    private void loadMapFragment() {
         loadMapFragment(null);
     }
 
-    public void loadMapFragment(final LatLng camera) {
+    private void loadMapFragment(final LatLng camera) {
         mapFragment = MapFragment.newInstance();
 
         getFragmentManager().beginTransaction().replace(R.id.main_fragment, mapFragment).commit();
 
-        mapFragmentManager = new MapFragmentManager(this, false);
+        mapFragmentManager = new MapFragmentManager(this);
 
         mapFragment.getMapAsync(mapFragmentManager);
 
@@ -171,7 +171,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         return dbHelper.getAllDestinations();
     }
 
-    public void loadDestinationsListFragment() {
+    private void loadDestinationsListFragment() {
         getFragmentManager().beginTransaction().replace(R.id.main_fragment,
                 DestinationList.newInstance(getDestinationsFromDB())).commit();
 
@@ -180,36 +180,68 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     @Override
-    public void onDeletedDestination(Destination deletedDestination) {
-        dbHelper.deleteDestination(deletedDestination.getDatabaseID());
-        destinationManager.removeDestination(deletedDestination.hashCode());
+    public void onDeletedDestination(int destinationID) {
+        Destination deleted = dbHelper.getDestination(destinationID);
+        destinationManager.removeDestination(deleted.generateID());
+        dbHelper.deleteDestination(destinationID);
     }
 
     @Override
     public void onAddedDestination(Destination addedDestination) {
-        dbHelper.insertDestination(addedDestination);
+        mListener.onDestinationAdded((int) dbHelper.insertDestination(addedDestination));
         destinationManager.addDestination(addedDestination);
+    }
+
+    @Override
+    public void onMovedDestination(LatLng newPosition, int destinationID) {
+        Utils.sendLog("Moving destination: " + destinationID + " to: " + newPosition.toString());
+        dbHelper.updateLatLng(destinationID, newPosition);
+        Destination deleted = dbHelper.getDestination(destinationID);
+        destinationManager.removeDestination(deleted.generateID());
+        deleted.setLatLng(newPosition);
+        destinationManager.addDestination(deleted);
     }
 
     @Override
     public void onActiveChanged(int destinationID, boolean active) {
         dbHelper.updateValue(destinationID, DestinationDBHelper.COLUMN_ACTIVE, active);
+        Destination tmpDestination = dbHelper.getDestination(destinationID);
+        if(active)
+            destinationManager.addDestination(tmpDestination);
+        else
+            destinationManager.removeDestination(tmpDestination.generateID());
         Utils.showSToast(active ? "ACTIVATED" : "DEACTIVATED", this);
     }
 
     @Override
     public void onDeleteOnReachChanged(int destinationID, boolean deleteOnReach) {
+        Destination tmpDestination = dbHelper.getDestination(destinationID);
+        destinationManager.removeDestination(tmpDestination.generateID());
         dbHelper.updateValue(destinationID, DestinationDBHelper.COLUMN_DELETEONREACH, deleteOnReach);
+        tmpDestination.setDeleteOnReach(deleteOnReach);
+        destinationManager.addDestination(tmpDestination);
         Utils.showSToast(deleteOnReach ? "Destination will be deleted when reached" : "Destination will be kept when reached", this);
     }
 
     @Override
     public void onDelete(int destinationID) {
+        Destination deleted = dbHelper.getDestination(destinationID);
+        destinationManager.removeDestination(deleted.generateID());
         dbHelper.deleteDestination(destinationID);
     }
 
     @Override
     public void onMapDescriptionClick(Destination destination) {
         loadMapFragment(destination.getdLatLng());
+    }
+
+    public interface OnDestinationAddedToDBListener {
+        void onDestinationAdded(int destinationID);
+    }
+
+    public void setOnDestinationAddedToDBListener(OnDestinationAddedToDBListener destinationAddedToDBListener) {
+        if(destinationAddedToDBListener != null) {
+            mListener = destinationAddedToDBListener;
+        }
     }
 }
