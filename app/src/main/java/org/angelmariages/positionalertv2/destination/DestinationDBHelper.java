@@ -44,6 +44,7 @@ public class DestinationDBHelper extends SQLiteOpenHelper {
 
     @Override
     public void onCreate(SQLiteDatabase db) {
+
         db.execSQL("CREATE TABLE " + DESTINATIONS_TABLE +
                 "(" + COLUMN_ID + " INTEGER PRIMARY KEY, " +
                 COLUMN_NAME + " TEXT, " +
@@ -76,7 +77,7 @@ public class DestinationDBHelper extends SQLiteOpenHelper {
         content.put(COLUMN_LONG, destination.getLongitude());
         content.put(COLUMN_RADIUS, destination.getRadius());
         content.put(COLUMN_ACTIVE, destination.active());
-        content.put(COLUMN_DELETEONREACH, destination.removeOnReach());
+        content.put(COLUMN_DELETEONREACH, destination.deleteOnReach());
         content.put(COLUMN_REGISTERED, destination.registered());
 
         Utils.sendLog("Inserting destination to database");
@@ -95,7 +96,7 @@ public class DestinationDBHelper extends SQLiteOpenHelper {
         content.put(COLUMN_LONG, destination.getLongitude());
         content.put(COLUMN_RADIUS, destination.getRadius());
         content.put(COLUMN_ACTIVE, destination.active());
-        content.put(COLUMN_DELETEONREACH, destination.removeOnReach());
+        content.put(COLUMN_DELETEONREACH, destination.deleteOnReach());
         content.put(COLUMN_REGISTERED, destination.registered());
 
         int result = db.update(DESTINATIONS_TABLE, content, "id = ?", new String[]{String.valueOf(destinationID)});

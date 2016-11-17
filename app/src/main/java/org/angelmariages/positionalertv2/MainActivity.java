@@ -23,11 +23,12 @@ import org.angelmariages.positionalertv2.destination.Destination;
 import org.angelmariages.positionalertv2.destination.DestinationDBHelper;
 import org.angelmariages.positionalertv2.destination.DestinationManager;
 import org.angelmariages.positionalertv2.destination.destinationlist.DestinationList;
-import org.angelmariages.positionalertv2.destination.destinationlist.DestinationListAdapter;
+import org.angelmariages.positionalertv2.destinationInterfaces.DestinationChangeListener;
+import org.angelmariages.positionalertv2.destinationInterfaces.DestinationToDBListener;
 
 import java.util.ArrayList;
 
-public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, MapFragmentManager.OnDestinationChangeListener, DestinationListAdapter.OnDestinationEditListener, MapFragmentManager.OnDescriptionMapClickListener {
+public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, DestinationChangeListener, MapFragmentManager.OnDescriptionMapClickListener {
 
     private MapFragmentManager mapFragmentManager;
     private MapFragment mapFragment;
@@ -35,7 +36,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private DestinationManager destinationManager;
     private DestinationDBHelper dbHelper;
     private NavigationView navigationView;
-    private OnDestinationAddedToDBListener mListener;
+    private DestinationToDBListener mToDBListener;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -179,22 +180,16 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         mapFragmentManager = null;
     }
 
+    /** START overrided methods of DestinationChangeListener */
     @Override
-    public void onDeletedDestination(int destinationID) {
-        Destination deleted = dbHelper.getDestination(destinationID);
-        destinationManager.removeDestination(deleted.generateID());
-        dbHelper.deleteDestination(destinationID);
-    }
-
-    @Override
-    public void onAddedDestination(Destination addedDestination) {
-        mListener.onDestinationAdded((int) dbHelper.insertDestination(addedDestination));
+    public void onAdded(Destination addedDestination) {
+        mToDBListener.onDestinationAdded((int) dbHelper.insertDestination(addedDestination));
         destinationManager.addDestination(addedDestination);
     }
 
     @Override
-    public void onMovedDestination(LatLng newPosition, int destinationID) {
-        Utils.sendLog("Moving destination: " + destinationID + " to: " + newPosition.toString());
+    public void onMoved(LatLng newPosition, int destinationID) {
+        //@TODO change order of arguments
         dbHelper.updateLatLng(destinationID, newPosition);
         Destination deleted = dbHelper.getDestination(destinationID);
         destinationManager.removeDestination(deleted.generateID());
@@ -210,7 +205,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             destinationManager.addDestination(tmpDestination);
         else
             destinationManager.removeDestination(tmpDestination.generateID());
-        Utils.showSToast(active ? "ACTIVATED" : "DEACTIVATED", this);
     }
 
     @Override
@@ -224,24 +218,29 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     @Override
-    public void onDelete(int destinationID) {
+    public void onChanged(Destination changedDestination) {
+        dbHelper.updateDestination(changedDestination.getDatabaseID(), changedDestination);
+        Destination tmpDestination = dbHelper.getDestination(changedDestination.getDatabaseID());
+        destinationManager.removeDestination(tmpDestination.generateID());
+        destinationManager.addDestination(tmpDestination);
+    }
+
+    @Override
+    public void onDeleted(int destinationID) {
         Destination deleted = dbHelper.getDestination(destinationID);
         destinationManager.removeDestination(deleted.generateID());
         dbHelper.deleteDestination(destinationID);
     }
+    /** END overrided methods of DestinationChangeListener */
 
     @Override
     public void onMapDescriptionClick(Destination destination) {
         loadMapFragment(destination.getdLatLng());
     }
 
-    public interface OnDestinationAddedToDBListener {
-        void onDestinationAdded(int destinationID);
-    }
-
-    public void setOnDestinationAddedToDBListener(OnDestinationAddedToDBListener destinationAddedToDBListener) {
-        if(destinationAddedToDBListener != null) {
-            mListener = destinationAddedToDBListener;
+    public void setDestinationToDBListener(DestinationToDBListener destinationToDBListener) {
+        if(destinationToDBListener != null) {
+            mToDBListener = destinationToDBListener;
         }
     }
 }

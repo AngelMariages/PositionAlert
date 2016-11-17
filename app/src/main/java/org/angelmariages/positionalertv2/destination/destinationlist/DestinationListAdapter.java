@@ -15,6 +15,7 @@ import com.google.android.gms.maps.GoogleMapOptions;
 import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.model.CameraPosition;
 
+import org.angelmariages.positionalertv2.destinationInterfaces.DestinationChangeListener;
 import org.angelmariages.positionalertv2.MapFragmentManager;
 import org.angelmariages.positionalertv2.Utils;
 import org.angelmariages.positionalertv2.destination.Destination;
@@ -28,11 +29,11 @@ public class DestinationListAdapter extends BaseExpandableListAdapter {
     private final int groupLayout;
     private final int childLayout;
 
-    private OnDestinationEditListener mListener;
+    private DestinationChangeListener mListener;
 
     public DestinationListAdapter(Context context, ArrayList<Destination> destinations) {
-        if(context instanceof OnDestinationEditListener) {
-            mListener = (OnDestinationEditListener) context;
+        if(context instanceof DestinationChangeListener) {
+            mListener = (DestinationChangeListener) context;
         } else {
             throw new RuntimeException(context.toString()
                     + " must implement OnDestinationEditListener");
@@ -138,7 +139,7 @@ public class DestinationListAdapter extends BaseExpandableListAdapter {
             deleteOnReachSwitch.setOnCheckedChangeListener(null);
 
             activeSwitch.setChecked(current.active());
-            deleteOnReachSwitch.setChecked(current.removeOnReach());
+            deleteOnReachSwitch.setChecked(current.deleteOnReach());
 
             activeSwitch.setOnCheckedChangeListener(activeSwitchListener);
 
@@ -148,7 +149,7 @@ public class DestinationListAdapter extends BaseExpandableListAdapter {
                 @Override
                 public void onClick(View view) {
                     if (mListener != null) {
-                        mListener.onDelete(current.getDatabaseID());
+                        mListener.onDeleted(current.getDatabaseID());
                         destinations.remove(groupPosition);
                         notifyDataSetChanged();
                     }
@@ -165,9 +166,11 @@ public class DestinationListAdapter extends BaseExpandableListAdapter {
         googleMapOptions.liteMode(true);
         googleMapOptions.camera(new CameraPosition.Builder()
                 .target(destinations.get(groupPosition).getdLatLng())
-                .zoom(Utils.getZoomByRadius(destinations.get(groupPosition).getRadius()))
+                .zoom(Utils.getZoomByRadius(destinations.get(groupPosition).getRadius(), destinations.get(groupPosition).getLatitude()))
                 .build());
         final MapFragment mapFragment = MapFragment.newInstance(googleMapOptions);
+
+        System.out.println(Utils.getZoomByRadius(200, 41.509926));
 
         activity.getFragmentManager().beginTransaction()
                 .replace(R.id.destinationDescriptionMap, mapFragment).commit();
@@ -187,15 +190,5 @@ public class DestinationListAdapter extends BaseExpandableListAdapter {
     @Override
     public boolean isChildSelectable(int i, int i1) {
         return false;
-    }
-
-    public void setOnDestinationEditListener(OnDestinationEditListener onDestinationEditListener) {
-        mListener = onDestinationEditListener;
-    }
-
-    public interface OnDestinationEditListener {
-        void onActiveChanged(int destinationID, boolean active);
-        void onDeleteOnReachChanged(int destinationID, boolean deleteOnReach);
-        void onDelete(int destinationID);
     }
 }

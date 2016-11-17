@@ -79,7 +79,7 @@ public class DestinationList extends Fragment {
         act.getWindowManager().getDefaultDisplay().getMetrics(dm);
         int width = dm.widthPixels;
 
-        expandableListView.setIndicatorBounds(width - Utils.getDipsFromPixels(35, expandableListView),
-                width - Utils.getDipsFromPixels(5, expandableListView));
+        expandableListView.setIndicatorBounds(width - Utils.getDPsFromPixels(35, expandableListView),
+                width - Utils.getDPsFromPixels(5, expandableListView));
     }
 }

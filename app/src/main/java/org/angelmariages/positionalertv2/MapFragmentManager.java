@@ -19,6 +19,8 @@ import com.google.android.gms.maps.model.MarkerOptions;
 
 import org.angelmariages.positionalertv2.destination.Destination;
 import org.angelmariages.positionalertv2.destination.DestinationDialogFragment;
+import org.angelmariages.positionalertv2.destinationInterfaces.DestinationChangeListener;
+import org.angelmariages.positionalertv2.destinationInterfaces.DestinationToDBListener;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -27,10 +29,10 @@ public class MapFragmentManager implements OnMapReadyCallback {
     private final Activity mapFragmentActivity;
     private GoogleMap googleMap;
 
-    private final HashMap<Marker, Circle> destinationMarkers = new HashMap<>();
+    private final HashMap<Marker, Circle> circlesByMarker = new HashMap<>();
     private OnMapFragmentReady fragmentReadyListener;
 
-    private OnDestinationChangeListener destinationChangeListener;
+    private DestinationChangeListener destinationChangeListener;
     private OnDescriptionMapClickListener descriptionMapClickListener;
 
     private final boolean lite;
@@ -38,8 +40,8 @@ public class MapFragmentManager implements OnMapReadyCallback {
 
     public MapFragmentManager(Activity mapFragmentActivity) {
         this.lite = false;
-        if(mapFragmentActivity instanceof OnDestinationChangeListener) {
-            destinationChangeListener = (OnDestinationChangeListener) mapFragmentActivity;
+        if(mapFragmentActivity instanceof DestinationChangeListener) {
+            destinationChangeListener = (DestinationChangeListener) mapFragmentActivity;
         }
         this.mapFragmentActivity = mapFragmentActivity;
     }
@@ -47,8 +49,8 @@ public class MapFragmentManager implements OnMapReadyCallback {
     public MapFragmentManager(Activity mapFragmentActivity, Destination destinationGroup) {
         this.lite = true;
         this.destinationGroup = destinationGroup;
-        if(mapFragmentActivity instanceof OnDestinationChangeListener) {
-            destinationChangeListener = (OnDestinationChangeListener) mapFragmentActivity;
+        if(mapFragmentActivity instanceof DestinationChangeListener) {
+            destinationChangeListener = (DestinationChangeListener) mapFragmentActivity;
         }
         if(mapFragmentActivity instanceof OnDescriptionMapClickListener) {
             descriptionMapClickListener = (OnDescriptionMapClickListener) mapFragmentActivity;
@@ -81,7 +83,7 @@ public class MapFragmentManager implements OnMapReadyCallback {
                    @Override
                    public void onInfoWindowClick(Marker marker) {
                        Destination markerDestination = (Destination) marker.getTag();
-                       showMarkerDialog(markerDestination.getName(), markerDestination.getRadius(), marker);
+                       showMarkerDialog(markerDestination, marker);
                    }
                }
             );
@@ -94,13 +96,13 @@ public class MapFragmentManager implements OnMapReadyCallback {
 
                 @Override
                 public void onMarkerDrag(Marker marker) {
-                    destinationMarkers.get(marker).setCenter(marker.getPosition());
+                    circlesByMarker.get(marker).setCenter(marker.getPosition());
                 }
 
                 @Override
                 public void onMarkerDragEnd(Marker marker) {
                     if(destinationChangeListener != null)
-                        destinationChangeListener.onMovedDestination(marker.getPosition(), ((Destination)marker.getTag()).getDatabaseID());
+                        destinationChangeListener.onMoved(marker.getPosition(), ((Destination)marker.getTag()).getDatabaseID());
                 }
             });
         } else {
@@ -162,7 +164,7 @@ public class MapFragmentManager implements OnMapReadyCallback {
                 .strokeColor(Color.RED)
                 .strokeWidth(5.0f)
                 .fillColor(Color.argb(25, 255, 0, 0)));
-        destinationMarkers.put(tmpMarker, tmpCircle);
+        circlesByMarker.put(tmpMarker, tmpCircle);
         return tmpMarker;
     }
 
@@ -178,47 +180,58 @@ public class MapFragmentManager implements OnMapReadyCallback {
                 .strokeColor(Color.RED)
                 .strokeWidth(5.0f)
                 .fillColor(Color.argb(25, 255, 0, 0)));
-        showMarkerDialog(null, 0, tmpMarker);
-        destinationMarkers.put(tmpMarker, tmpCircle);
+        showMarkerDialog(null, tmpMarker);
+        circlesByMarker.put(tmpMarker, tmpCircle);
         return tmpMarker;
     }
 
-    private void showMarkerDialog(String destinationName, int radius, final Marker marker) {
+    private void showMarkerDialog(Destination destination, final Marker marker) {
+        if(destination == null) {
+            destination = new Destination(Utils.NULL_ID,
+                    null,
+                    marker.getPosition(),
+                    500,
+                    true,
+                    false,
+                    false);
+        }
+
         DestinationDialogFragment destinationDialogFragment = DestinationDialogFragment
-                .newInstance(destinationName, radius);
+                .newInstance(destination);
         destinationDialogFragment.show(mapFragmentActivity.getFragmentManager(), "TAG");
+        final MainActivity mainActivity = (MainActivity) mapFragmentActivity;
 
-        destinationDialogFragment.setOnDestinationDialogListener(new DestinationDialogFragment.OnDestinationDialogListener() {
+        destinationDialogFragment.setOnDestinationDialogListener(new DestinationDialogFragment.DestinationDialogListener() {
             @Override
-            public void onOkClicked(String destinationName, int radius) {
-                final Destination tmpDestination = new Destination(-1,
-                        destinationName,
-                        marker.getPosition(),
-                        radius,
-                        true,
-                        false,
-                        true
-                );
-                marker.setTitle(destinationName);
-                destinationMarkers.get(marker).setRadius(radius);
+            public void onOkClicked(final Destination destination) {
+                marker.setTitle(destination.getName());
+                circlesByMarker.get(marker).setRadius(destination.getRadius());
                 marker.showInfoWindow();
-                ((MainActivity) mapFragmentActivity).setOnDestinationAddedToDBListener(new MainActivity.OnDestinationAddedToDBListener() {
-                    @Override
-                    public void onDestinationAdded(int destinationID) {
-                        tmpDestination.setDatabaseID(destinationID);
-                        marker.setTag(tmpDestination);
-                    }
-                });
+                if(destination.getDatabaseID() == Utils.NULL_ID) {
+                    mainActivity.setDestinationToDBListener(new DestinationToDBListener() {
+                        @Override
+                        public void onDestinationAdded(int destinationID) {
+                            destination.setDatabaseID(destinationID);
+                            marker.setTag(destination);
+                            Utils.showLToast("Destination added succesfully!", mainActivity);
+                        }
+                    });
 
-                if(destinationChangeListener != null)
-                    destinationChangeListener.onAddedDestination(tmpDestination);
+                    if (destinationChangeListener != null)
+                        destinationChangeListener.onAdded(destination);
+                } else {
+                    if(destinationChangeListener != null)
+                        destinationChangeListener.onChanged(destination);
+
+                    Utils.showLToast("Destination changed succesfully!", mainActivity);
+                }
             }
 
             @Override
             public void onDeleteClicked() {
                 if(destinationChangeListener != null && marker.getTag() != null)
-                    destinationChangeListener.onDeletedDestination(((Destination)marker.getTag()).getDatabaseID());
-                destinationMarkers.get(marker).remove();
+                    destinationChangeListener.onDeleted(((Destination)marker.getTag()).getDatabaseID());
+                circlesByMarker.get(marker).remove();
                 marker.remove();
             }
         });
@@ -260,12 +273,6 @@ public class MapFragmentManager implements OnMapReadyCallback {
         if(onMapFragmentReady != null) {
             fragmentReadyListener = onMapFragmentReady;
         }
-    }
-
-    public interface OnDestinationChangeListener {
-        void onDeletedDestination(int destinationID);
-        void onAddedDestination(Destination addedDestination);
-        void onMovedDestination(LatLng newPosition, int destinationID);
     }
 
     public interface OnDescriptionMapClickListener {

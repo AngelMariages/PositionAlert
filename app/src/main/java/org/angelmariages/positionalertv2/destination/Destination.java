@@ -9,7 +9,7 @@ import java.io.Serializable;
 
 public class Destination implements Serializable {
     private int databaseID;
-    private boolean removeOnReach;
+    private boolean deleteOnReach;
     private transient LatLng latLng;
     private int radius;
     private String name;
@@ -17,13 +17,13 @@ public class Destination implements Serializable {
     private boolean activated;
 
 
-    public Destination(int databaseID, String name, LatLng latLng, int radius, boolean activated, boolean removeOnReach, boolean registered) {
+    public Destination(int databaseID, String name, LatLng latLng, int radius, boolean activated, boolean deleteOnReach, boolean registered) {
         this.databaseID = databaseID;
         this.name = name;
         this.latLng = latLng;
         this.radius = radius;
         this.activated = activated;
-        this.removeOnReach = removeOnReach;
+        this.deleteOnReach = deleteOnReach;
         this.registered = registered;
     }
 
@@ -31,7 +31,7 @@ public class Destination implements Serializable {
     public String toString() {
         return "Destination{" +
                 "databaseID=" + databaseID +
-                ", removeOnReach=" + removeOnReach +
+                ", deleteOnReach=" + deleteOnReach +
                 ", latLng=" + latLng +
                 ", radius=" + radius +
                 ", name='" + name + '\'' +
@@ -59,12 +59,12 @@ public class Destination implements Serializable {
         this.databaseID = databaseID;
     }
 
-    public boolean removeOnReach() {
-        return removeOnReach;
+    public boolean deleteOnReach() {
+        return deleteOnReach;
     }
 
-    public void setDeleteOnReach(boolean removeOnReach) {
-        this.removeOnReach = removeOnReach;
+    public void setDeleteOnReach(boolean deleteOnReach) {
+        this.deleteOnReach = deleteOnReach;
     }
 
     public LatLng getdLatLng() {
@@ -118,6 +118,6 @@ public class Destination implements Serializable {
     public String generateID() {
         return databaseID + "|@|" +
                 name + "|@|" +
-                removeOnReach;
+                deleteOnReach;
     }
 }
