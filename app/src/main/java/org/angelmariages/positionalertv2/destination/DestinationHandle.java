@@ -20,6 +20,8 @@ import java.util.List;
 
 public class DestinationHandle extends IntentService {
 
+    private DestinationDBHelper dbHelper;
+
     public DestinationHandle() {
         super(Utils.DESTINATION_SERVICE_NAME);
     }
@@ -27,6 +29,7 @@ public class DestinationHandle extends IntentService {
     @Override
     protected void onHandleIntent(Intent intent) {
         GeofencingEvent geofencingEvent = GeofencingEvent.fromIntent(intent);
+        dbHelper = new DestinationDBHelper(this);
 
         if(geofencingEvent.hasError()) {
             Utils.sendLog("GeofencingIntent has error: " + geofencingEvent.getErrorCode());
@@ -52,6 +55,11 @@ public class DestinationHandle extends IntentService {
             return;
         }
         createGeofenceNotification(Integer.parseInt(geofenceArguments[0]), geofenceArguments[1]);
+        if(Boolean.parseBoolean(geofenceArguments[2])) {
+            dbHelper.deleteDestination(Integer.parseInt(geofenceArguments[0]));
+
+            dbHelper.close();
+        }
 
         String ringtoneSaved = getSharedPreferences(Utils.SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE)
                 .getString(Utils.RINGTONE_PREFERENCE, null);

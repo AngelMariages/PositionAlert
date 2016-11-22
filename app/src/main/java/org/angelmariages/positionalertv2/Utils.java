@@ -23,35 +23,11 @@ public abstract class Utils {
         Toast.makeText(context, text, Toast.LENGTH_LONG).show();
     }
 
-    public static float getZoomByRadius(int radius, Context context) {
-        DisplayMetrics displayMetrics = new DisplayMetrics();
-        ((Activity) context).getWindowManager()
-                .getDefaultDisplay()
-                .getMetrics(displayMetrics);
-
-        int heightPixels = displayMetrics.heightPixels;
-        return getZoomByRadius(radius, heightPixels);
-    }
-
     public static float getZoomByRadius(int radius, double latitude) {
-        //double equator = 40075016.686;
+        double equator = 40075016.686;
+        double pixelsWide = 256;
 
-        //return (float) Math.abs(log2((radius * Math.pow(2,8)) / (equator * Math.cos(latitude))));
-
-        if(radius <= 100)
-            return 17.0f;
-        else if(radius <= 100)
-            return 16.0f;
-        else if(radius <= 200)
-            return 15.0f;
-        else if(radius <= 300)
-            return 14.0f;
-        else if(radius <= 400)
-            return 14.0f;
-        else if(radius <= 600)
-            return 13.0f;
-        else
-            return 12.0f;
+        return (float) Math.abs(log2(Math.abs((radius/pixelsWide * Math.pow(2,8)) / (equator * Math.cos(latitude)))));
     }
 
     public static double log2(double v) {
@@ -61,6 +37,17 @@ public abstract class Utils {
     public static int getDPsFromPixels(int pixels, View view) {
         final float scale = view.getResources().getDisplayMetrics().density;
         return (int)(pixels * scale + 0.5f);
+    }
+
+    public static int getPixelsFromDPs(int dps, View view) {
+        final float scale = view.getResources().getDisplayMetrics().density;
+        return (int)((dps - 0.5f) / scale);
+    }
+
+    public static int getPixelsFromDPs(int dps, Activity activity) {
+        final float scale = activity.getResources().getDisplayMetrics().density;
+        Utils.sendLog("scale:"  + String.valueOf(scale));
+        return (int)((dps - 0.5f) / scale);
     }
 
     public static void sendLog(String text) {

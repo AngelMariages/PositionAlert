@@ -253,9 +253,9 @@ public class MapFragmentManager implements OnMapReadyCallback {
         setDestinationMarker(destination, true);
     }
 
-    public void updateCamera(LatLng position) {
+    public void updateCamera(LatLng position, int radius) {
         if(googleMap != null) {
-            googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(position, 13.0f));
+            googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(position, Utils.getZoomByRadius(radius, position.latitude) - 0.5f));
         }
     }
 

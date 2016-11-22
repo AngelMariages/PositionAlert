@@ -141,10 +141,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     private void loadMapFragment() {
-        loadMapFragment(null);
+        loadMapFragment(null, 0);
     }
 
-    private void loadMapFragment(final LatLng camera) {
+    private void loadMapFragment(final LatLng camera, final int radius) {
         mapFragment = MapFragment.newInstance();
 
         getFragmentManager().beginTransaction().replace(R.id.main_fragment, mapFragment).commit();
@@ -158,7 +158,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             public void onMapFragmentReady() {
                 mapFragmentManager.loadMarkers(getDestinationsFromDB());
                 if (camera != null) {
-                    mapFragmentManager.updateCamera(camera);
+                    mapFragmentManager.updateCamera(camera, radius);
                 }
             }
         });
@@ -235,7 +235,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     @Override
     public void onMapDescriptionClick(Destination destination) {
-        loadMapFragment(destination.getdLatLng());
+        loadMapFragment(destination.getdLatLng(), destination.getRadius());
     }
 
     public void setDestinationToDBListener(DestinationToDBListener destinationToDBListener) {

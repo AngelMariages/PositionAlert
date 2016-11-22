@@ -166,11 +166,9 @@ public class DestinationListAdapter extends BaseExpandableListAdapter {
         googleMapOptions.liteMode(true);
         googleMapOptions.camera(new CameraPosition.Builder()
                 .target(destinations.get(groupPosition).getdLatLng())
-                .zoom(Utils.getZoomByRadius(destinations.get(groupPosition).getRadius(), destinations.get(groupPosition).getLatitude()))
+                .zoom((float)Math.floor(Utils.getZoomByRadius(destinations.get(groupPosition).getRadius(), destinations.get(groupPosition).getLatitude()) - 1.2f))
                 .build());
         final MapFragment mapFragment = MapFragment.newInstance(googleMapOptions);
-
-        System.out.println(Utils.getZoomByRadius(200, 41.509926));
 
         activity.getFragmentManager().beginTransaction()
                 .replace(R.id.destinationDescriptionMap, mapFragment).commit();
