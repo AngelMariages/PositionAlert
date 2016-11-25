@@ -12,6 +12,7 @@ public abstract class Utils {
     public static final String SHARED_PREFERENCES_NAME = "org.angelmariages.positionalertv2.SHARED_PREFERENCES_NAME";
     public static final String RINGTONE_PREFERENCE = "org.angelmariages.positionalertv2.RINGTONE_PREFERENCE_";
     public static final int NULL_ID = -1;
+    public static final String RINGTONE_TO_ACTIVITY = "org.angelmariages.positionalertv2.STOP_RINGTONE_ACTION";
     public static String geofenceDefaultName = "org.angelmariages.positionalertv2.GEOFENCE_DEFAULT";
     public static final int RINGTONE_SELECT_RESULT = 987;
 

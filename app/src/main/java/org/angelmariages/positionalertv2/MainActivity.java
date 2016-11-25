@@ -45,7 +45,14 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         dbHelper = new DestinationDBHelper(this);
 
-        loadMapFragment();
+        Intent intent = getIntent();
+        if (intent.hasExtra(Utils.RINGTONE_TO_ACTIVITY)) {
+            String ringtone = intent.getStringExtra(Utils.RINGTONE_TO_ACTIVITY);
+            loadStopAlarmFragment(ringtone);
+
+        } else {
+            loadMapFragment();
+        }
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);//Afegir Toolbar de dalt
         setSupportActionBar(toolbar);
@@ -134,13 +141,18 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         } else if (id == R.id.nav_destinationsList) {
             loadDestinationsListFragment();
         } else if (id == R.id.test) {
-            StopAlarmFragment stopAlarmFragment = new StopAlarmFragment();
-            getFragmentManager().beginTransaction().replace(R.id.main_fragment, stopAlarmFragment).commit();
+            loadStopAlarmFragment(RingtoneManager.EXTRA_RINGTONE_DEFAULT_URI);
         }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
+    }
+
+    private void loadStopAlarmFragment(String ringtone) {
+        getFragmentManager().beginTransaction().replace(R.id.main_fragment,
+                StopAlarmFragment.newInstance(ringtone)
+                ).commit();
     }
 
     private void loadMapFragment() {

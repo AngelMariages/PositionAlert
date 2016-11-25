@@ -5,13 +5,13 @@ import android.app.Notification;
 import android.app.NotificationManager;
 import android.content.Context;
 import android.content.Intent;
-import android.media.RingtoneManager;
 import android.support.v4.app.NotificationCompat;
 
 import com.google.android.gms.location.Geofence;
 import com.google.android.gms.location.GeofencingEvent;
 import com.google.android.gms.location.GeofencingRequest;
 
+import org.angelmariages.positionalertv2.MainActivity;
 import org.angelmariages.positionalertv2.R;
 import org.angelmariages.positionalertv2.Utils;
 
@@ -63,28 +63,8 @@ public class DestinationHandle extends IntentService {
 
         String ringtoneSaved = getSharedPreferences(Utils.SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE)
                 .getString(Utils.RINGTONE_PREFERENCE, null);
-        if(ringtoneSaved == null) {
-            ringtoneSaved = RingtoneManager.EXTRA_RINGTONE_DEFAULT_URI;
-        }
 
-
-
-            /*try {
-                MediaPlayer mediaPlayer = new MediaPlayer();
-                mediaPlayer.setDataSource(this, Uri.parse(ringtoneSaved));
-                mediaPlayer.prepare();
-                mediaPlayer.setLooping(false);
-                mediaPlayer.start();
-                mediaPlayer.setOnSeekCompleteListener(new MediaPlayer.OnSeekCompleteListener() {
-                    @Override
-                    public void onSeekComplete(MediaPlayer mediaPlayer) {
-                        mediaPlayer.stop();
-                        mediaPlayer.release();
-                    }
-                });
-            } catch(IOException e) {
-                e.printStackTrace();
-            }*/
+        startRingtoneActivity(ringtoneSaved);
     }
 
     private void createGeofenceNotification(int geofenceID, String geofenceName) {
@@ -115,5 +95,11 @@ public class DestinationHandle extends IntentService {
             }
         }
         return arguments;
+    }
+
+    public void startRingtoneActivity(String ringtone) {
+        Intent intent = new Intent(this, MainActivity.class);
+        intent.putExtra(Utils.RINGTONE_TO_ACTIVITY, ringtone);
+        startActivity(intent);
     }
 }
