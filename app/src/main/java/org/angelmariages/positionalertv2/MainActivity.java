@@ -129,10 +129,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         // Handle navigation view item clicks here.
         int id = item.getItemId();
 
-        if (id == R.id.nav_camara) {
+        if (id == R.id.nav_map) {
             loadMapFragment();
-        } else if (id == R.id.nav_gallery) {
+        } else if (id == R.id.nav_destinationsList) {
             loadDestinationsListFragment();
+        } else if (id == R.id.test) {
+            StopAlarmFragment stopAlarmFragment = new StopAlarmFragment();
+            getFragmentManager().beginTransaction().replace(R.id.main_fragment, stopAlarmFragment).commit();
         }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);

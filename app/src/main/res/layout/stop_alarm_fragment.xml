@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:gravity="center_vertical|center_horizontal">
+
+    <TextView
+        android:text="Move the slider to stop the alarm"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/stopAlarmText"
+        android:textAppearance="@style/TextAppearance.AppCompat.Large"
+        android:textAlignment="center"
+        android:textStyle="normal|bold" />
+
+    <SeekBar
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/seekStop"
+        android:max="100"
+        android:scrollbarSize="30dp"
+        style="@style/tallerSeekBar" />
+</LinearLayout>

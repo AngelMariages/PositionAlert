@@ -10,7 +10,6 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import org.angelmariages.positionalertv2.R;
-import org.angelmariages.positionalertv2.Utils;
 
 public class DestinationDialogFragment extends DialogFragment {
 
