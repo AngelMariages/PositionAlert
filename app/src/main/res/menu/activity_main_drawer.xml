@@ -2,10 +2,8 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 
     <group android:checkableBehavior="single">
-        <item android:title="Test"
-            android:id="@+id/test" />
         <item android:id="@+id/nav_map" android:icon="@android:drawable/ic_dialog_map"
-            android:title="Map" />
+              android:title="Map" />
         <item android:id="@+id/nav_destinationsList" android:icon="@android:drawable/ic_menu_directions"
             android:title="Destinations" />
     </group>

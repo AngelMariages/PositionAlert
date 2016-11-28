@@ -88,7 +88,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     @Override
     protected void onDestroy() {
-        //destinationManager.removeDestination(defaultDestination.getName());
+        dbHelper.close();
         super.onDestroy();
     }
 
@@ -140,8 +140,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             loadMapFragment();
         } else if (id == R.id.nav_destinationsList) {
             loadDestinationsListFragment();
-        } else if (id == R.id.test) {
-            loadStopAlarmFragment(RingtoneManager.EXTRA_RINGTONE_DEFAULT_URI);
         }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);

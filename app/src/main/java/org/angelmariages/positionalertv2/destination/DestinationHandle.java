@@ -42,14 +42,16 @@ public class DestinationHandle extends IntentService {
 
             List<Geofence> geofenceList = geofencingEvent.getTriggeringGeofences();
 
-            for(Geofence geofence : geofenceList) {
+            for(int i = 0, geofenceListSize = geofenceList.size(); i < geofenceListSize; i++) {
+                Geofence geofence = geofenceList.get(i);
                 Utils.sendLog(geofence.getRequestId() + " : " + geoFenceTransition);
-                parseGeofenceRequest(getGeofenceArguments(geofence.getRequestId()));
+
+                parseGeofenceRequest(getGeofenceArguments(geofence.getRequestId()), i == 0);
             }
         }
     }
 
-    private void parseGeofenceRequest(String[] geofenceArguments) {
+    private void parseGeofenceRequest(String[] geofenceArguments, boolean playSound) {
         if(geofenceArguments == null) {
             Utils.sendLog("Null geofence arguments!");
             return;
@@ -64,7 +66,10 @@ public class DestinationHandle extends IntentService {
         String ringtoneSaved = getSharedPreferences(Utils.SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE)
                 .getString(Utils.RINGTONE_PREFERENCE, null);
 
-        startRingtoneActivity(ringtoneSaved);
+        Utils.sendLog("SAVED:" + ringtoneSaved);
+
+        if(playSound)
+            startRingtoneActivity(ringtoneSaved);
     }
 
     private void createGeofenceNotification(int geofenceID, String geofenceName) {
@@ -99,6 +104,7 @@ public class DestinationHandle extends IntentService {
 
     public void startRingtoneActivity(String ringtone) {
         Intent intent = new Intent(this, MainActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         intent.putExtra(Utils.RINGTONE_TO_ACTIVITY, ringtone);
         startActivity(intent);
     }

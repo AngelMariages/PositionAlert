@@ -2,6 +2,7 @@ package org.angelmariages.positionalertv2;
 
 import android.app.Fragment;
 import android.content.Context;
+import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.media.RingtoneManager;
 import android.net.Uri;
@@ -74,15 +75,24 @@ public class StopAlarmFragment extends Fragment {
 
     public void startRingtone(Context context) {
         if(ringtoneSaved == null || ringtoneSaved.isEmpty()) {
-            ringtoneSaved = RingtoneManager.EXTRA_RINGTONE_DEFAULT_URI;
+            ringtoneSaved = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_RINGTONE).toString();
         }
+        Utils.sendLog(ringtoneSaved);
         try {
             mediaPlayer = new MediaPlayer();
-            mediaPlayer.setDataSource(context, Uri.parse(ringtoneSaved));
+            mediaPlayer.setDataSource(getActivity().getApplicationContext(), Uri.parse(ringtoneSaved));
+            mediaPlayer.setAudioStreamType(AudioManager.STREAM_ALARM);
             mediaPlayer.prepare();
             mediaPlayer.setLooping(true);
             mediaPlayer.start();
             mediaPlayer.setScreenOnWhilePlaying(true);
+            mediaPlayer.setOnErrorListener(new MediaPlayer.OnErrorListener() {
+                @Override
+                public boolean onError(MediaPlayer mediaPlayer, int i, int i1) {
+                    Utils.sendLog("WHAT: " + i + ", EXTRA: " + i1);
+                    return false;
+                }
+            });
             Utils.sendLog("STARTED!!");
             Utils.sendLog("URI: " + ringtoneSaved);
         } catch (IOException e) {
