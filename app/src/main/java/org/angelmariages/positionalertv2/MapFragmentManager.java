@@ -1,11 +1,7 @@
 package org.angelmariages.positionalertv2;
 
-import android.Manifest;
 import android.app.Activity;
-import android.content.pm.PackageManager;
 import android.graphics.Color;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;
 import android.util.TypedValue;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -74,7 +70,6 @@ public class MapFragmentManager implements OnMapReadyCallback {
             googleMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
                 @Override
                 public void onMapClick(LatLng latLng) {
-                    //TODO: add destination to marker and then query it on the activity with current marker
                     onMapFragmentClick(latLng);
                 }
             });
@@ -102,7 +97,7 @@ public class MapFragmentManager implements OnMapReadyCallback {
                 @Override
                 public void onMarkerDragEnd(Marker marker) {
                     if(destinationChangeListener != null)
-                        destinationChangeListener.onMoved(marker.getPosition(), ((Destination)marker.getTag()).getDatabaseID());
+                        destinationChangeListener.onMoved(((Destination)marker.getTag()).getDatabaseID(), marker.getPosition());
                 }
             });
         } else {
@@ -130,16 +125,23 @@ public class MapFragmentManager implements OnMapReadyCallback {
     }
 
     private void checkPermissions() {
-        if(ContextCompat.checkSelfPermission(mapFragmentActivity, Manifest.permission.ACCESS_FINE_LOCATION)
-                == PackageManager.PERMISSION_GRANTED) {
-            googleMap.setMyLocationEnabled(true);
-            googleMap.getUiSettings().setMyLocationButtonEnabled(true);
+        if(!Utils.checkPositionPermissions(mapFragmentActivity)) {
+            Utils.askPositionPermissions(mapFragmentActivity);
         } else {
-            //TODO: check map settings
-            ActivityCompat.requestPermissions(mapFragmentActivity,
-                    new String[]{Manifest.permission.ACCESS_COARSE_LOCATION,
-                            Manifest.permission.ACCESS_FINE_LOCATION
-                    }, 0);
+            setMapParameters();
+        }
+    }
+
+    public void setMapParameters() {
+        if(googleMap != null) {
+            try {
+                googleMap.setMyLocationEnabled(true);
+            } catch (SecurityException e) {
+                checkPermissions();
+            }
+            googleMap.getUiSettings().setMyLocationButtonEnabled(true);
+            googleMap.getUiSettings().setCompassEnabled(true);
+            googleMap.getUiSettings().setZoomControlsEnabled(true);
         }
     }
 

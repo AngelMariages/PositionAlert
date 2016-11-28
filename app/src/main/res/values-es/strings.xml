@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">PositionAlertV2</string>
+    <string name="action_settings">Configuración</string>
+    <string name="activeSwitch">Activada:</string>
+    <string name="deleteOnReachSwitch">Borrar al llegar</string>
+    <string name="destinationDeleteButton">Borrar</string>
+    <string name="destination_dialog_button_add">Añadir</string>
+    <string name="destination_dialog_button_delete">Esborrar</string>
+    <string name="destination_dialog_name">Nombre:</string>
+    <string name="destination_dialog_name_hint">Mi primera destinación</string>
+    <string name="destination_dialog_radius">Radio (m):</string>
+    <string name="latitudeText">Latitud: %f</string>
+    <string name="longitudeText">Longitud: %f</string>
+    <string name="menu_destinations">Destinaciones</string>
+    <string name="menu_map">Mapa</string>
+    <string name="radiusText">Radio (m): %d</string>
+    <string name="sound_select_menu_text">Selecciona un sonido de notificación</string>
+    <string name="stop_alarm_message">Muevelo hacia la derecha para detener la alarma</string>
+</resources>

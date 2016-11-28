@@ -23,7 +23,7 @@ import org.angelmariages.positionalertv2.R;
 
 import java.util.ArrayList;
 
-public class DestinationListAdapter extends BaseExpandableListAdapter {
+class DestinationListAdapter extends BaseExpandableListAdapter {
     private final Context context;
     private final ArrayList<Destination> destinations;
     private final int groupLayout;

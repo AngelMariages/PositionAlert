@@ -5,7 +5,7 @@
     android:gravity="center_vertical|center_horizontal">
 
     <TextView
-        android:text="Move the slider to stop the alarm"
+        android:text="@string/stop_alarm_message"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/stopAlarmText"

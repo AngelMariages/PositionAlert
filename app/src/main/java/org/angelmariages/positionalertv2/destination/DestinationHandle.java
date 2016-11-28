@@ -86,7 +86,7 @@ public class DestinationHandle extends IntentService {
         notificationManager.notify(geofenceID, notification);
     }
 
-    public static String[] getGeofenceArguments(String geofenceName) {
+    private static String[] getGeofenceArguments(String geofenceName) {
         String[] arguments = null;
         if(geofenceName != null && !geofenceName.isEmpty()) {
             String[] splited = geofenceName.split("\\|@\\|");
@@ -102,7 +102,7 @@ public class DestinationHandle extends IntentService {
         return arguments;
     }
 
-    public void startRingtoneActivity(String ringtone) {
+    private void startRingtoneActivity(String ringtone) {
         Intent intent = new Intent(this, MainActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         intent.putExtra(Utils.RINGTONE_TO_ACTIVITY, ringtone);

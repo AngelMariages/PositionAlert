@@ -1,8 +1,11 @@
 package org.angelmariages.positionalertv2;
 
+import android.Manifest;
 import android.app.Activity;
 import android.content.Context;
-import android.util.DisplayMetrics;
+import android.content.pm.PackageManager;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
@@ -31,7 +34,7 @@ public abstract class Utils {
         return (float) Math.abs(log2(Math.abs((radius/pixelsWide * Math.pow(2,8)) / (equator * Math.cos(latitude)))));
     }
 
-    public static double log2(double v) {
+    private static double log2(double v) {
         return Math.log(v) / Math.log(2);
     }
 
@@ -51,7 +54,22 @@ public abstract class Utils {
         return (int)((dps - 0.5f) / scale);
     }
 
+    public static boolean checkPositionPermissions(Context context) {
+        //@TODO Check also for coarse location
+        return (ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION)
+                == PackageManager.PERMISSION_GRANTED);
+    }
+
+    public static void askPositionPermissions(Activity activity) {
+        ActivityCompat.requestPermissions(activity,
+            new String[]{Manifest.permission.ACCESS_COARSE_LOCATION,
+                    Manifest.permission.ACCESS_FINE_LOCATION
+            }, 0);
+    }
+
     public static void sendLog(String text) {
-        Log.d("Biker", text);
+        if(BuildConfig.DEBUG) {
+            Log.d("Biker", text);
+        }
     }
 }

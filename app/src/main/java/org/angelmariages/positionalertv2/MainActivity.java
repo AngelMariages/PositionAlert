@@ -57,7 +57,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);//Afegir Toolbar de dalt
         setSupportActionBar(toolbar);
 
-        destinationManager = new DestinationManager(this.getApplicationContext());
+        destinationManager = new DestinationManager(this);
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
@@ -89,6 +89,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     @Override
     protected void onDestroy() {
         dbHelper.close();
+        destinationManager.disconnectApiClient();
         super.onDestroy();
     }
 
@@ -201,8 +202,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     @Override
-    public void onMoved(LatLng newPosition, int destinationID) {
-        //@TODO change order of arguments
+    public void onMoved(int destinationID, LatLng newPosition) {
         dbHelper.updateLatLng(destinationID, newPosition);
         Destination deleted = dbHelper.getDestination(destinationID);
         destinationManager.removeDestination(deleted.generateID());
@@ -254,6 +254,19 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     public void setDestinationToDBListener(DestinationToDBListener destinationToDBListener) {
         if(destinationToDBListener != null) {
             mToDBListener = destinationToDBListener;
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        switch (requestCode) {
+            //@TODO change with another code
+            case 0: {
+                mapFragmentManager.setMapParameters();
+            } break;
+            default: {
+                super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+            }
         }
     }
 }

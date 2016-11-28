@@ -1,5 +1,6 @@
 package org.angelmariages.positionalertv2;
 
+import android.app.Activity;
 import android.content.Context;
 import android.location.Location;
 import android.os.Bundle;
@@ -13,20 +14,20 @@ import com.google.android.gms.location.LocationServices;
 public class LocationApiClient implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
 
     private GoogleApiClient mGoogleApiClient;
-    private Context mContext;
+    private Activity mActivity;
     private boolean mConnected;
 
     public LocationApiClient() {
     }
 
-    public GoogleApiClient getApiClient(Context context) {
-        if (mContext == null) {
-            mContext = context;
+    public GoogleApiClient getApiClient(Activity activity) {
+        if (mActivity == null) {
+            mActivity = activity;
         }
         if (mGoogleApiClient != null) {
             return mGoogleApiClient;
         } else {
-            mGoogleApiClient = new GoogleApiClient.Builder(mContext)
+            mGoogleApiClient = new GoogleApiClient.Builder(mActivity)
                     .addConnectionCallbacks(this)
                     .addOnConnectionFailedListener(this)
                     .addApi(LocationServices.API)
@@ -56,13 +57,14 @@ public class LocationApiClient implements GoogleApiClient.ConnectionCallbacks, G
     }
 
     public Location getLocation() {
+        if(!Utils.checkPositionPermissions(mActivity)) {
+            Utils.askPositionPermissions(mActivity);
+        }
         try {
             return LocationServices.FusedLocationApi.getLastLocation(
                     mGoogleApiClient);
         } catch (SecurityException e) {
-            //TODO: check for permissions
             Utils.sendLog("LocationApiClient error: can't get permissions to ");
-            e.printStackTrace();
             return null;
         }
     }

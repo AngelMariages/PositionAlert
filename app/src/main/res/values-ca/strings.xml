@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">PositionAlertV2</string>
+    <string name="action_settings">Configuració</string>
+    <string name="activeSwitch">Activada:</string>
+    <string name="deleteOnReachSwitch">Esborrar a l\'arribar</string>
+    <string name="destinationDeleteButton">Esborrar</string>
+    <string name="destination_dialog_button_add">Afegir</string>
+    <string name="destination_dialog_button_delete">Esborrar</string>
+    <string name="destination_dialog_name">Nom:</string>
+    <string name="destination_dialog_name_hint">La meva destinació</string>
+    <string name="destination_dialog_radius">Radi (m):</string>
+    <string name="latitudeText">Latitud: %f</string>
+    <string name="longitudeText">Longitud: %f</string>
+    <string name="menu_destinations">Destinacions</string>
+    <string name="menu_map">Mapa</string>
+    <string name="radiusText">Radi (m): %d</string>
+    <string name="sound_select_menu_text">Selecciona un tó de notificació</string>
+    <string name="stop_alarm_message">Mou-lo cap a la dreta per parar l\'alarma</string>
+</resources>

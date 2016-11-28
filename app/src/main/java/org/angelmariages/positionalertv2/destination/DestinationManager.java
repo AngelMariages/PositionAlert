@@ -1,8 +1,10 @@
 package org.angelmariages.positionalertv2.destination;
 
+import android.app.Activity;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.location.Location;
 import android.os.CountDownTimer;
 import android.support.annotation.NonNull;
 
@@ -12,6 +14,7 @@ import com.google.android.gms.common.api.Status;
 import com.google.android.gms.location.Geofence;
 import com.google.android.gms.location.GeofencingRequest;
 import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.maps.model.LatLng;
 
 import org.angelmariages.positionalertv2.LocationApiClient;
 import org.angelmariages.positionalertv2.Utils;
@@ -23,11 +26,22 @@ public class DestinationManager implements ResultCallback<Status> {
     private final Context mContext;
     private final LocationApiClient mLocationApiClient;
 
-    public DestinationManager(Context context) {
-        this.mContext = context;
+    public DestinationManager(Activity activity) {
+        this.mContext = activity.getApplicationContext();
         mLocationApiClient = new LocationApiClient();
-        this.mGoogleApiClient = mLocationApiClient.getApiClient(context);
+        this.mGoogleApiClient = mLocationApiClient.getApiClient(activity);
         mLocationApiClient.connect();
+    }
+
+    public void disconnectApiClient() {
+        mLocationApiClient.disconnect();
+    }
+
+    public Location getCurrentPosition() {
+        if (mLocationApiClient.isConnected()) {
+            return mLocationApiClient.getLocation();
+        }
+        return null;
     }
 
     public void addDestination(final Destination destination) {

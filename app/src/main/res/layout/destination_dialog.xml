@@ -11,7 +11,7 @@
         android:layout_height="wrap_content">
 
         <TextView
-            android:text="Name:"
+            android:text="@string/destination_dialog_name"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             />
@@ -22,7 +22,7 @@
             android:inputType="text"
             android:ems="10"
             android:id="@+id/destinationNameEdit"
-            android:hint="My first destination"
+            android:hint="@string/destination_dialog_name_hint"
             android:layout_weight="1"
             android:maxLines="1" />
     </LinearLayout>
@@ -33,7 +33,7 @@
         android:layout_height="wrap_content">
 
         <TextView
-            android:text="Radius (m):"
+            android:text="@string/destination_dialog_radius"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             />
@@ -45,7 +45,7 @@
             android:ems="10"
             android:id="@+id/destinationRadiusEdit"
             android:layout_weight="1"
-            android:hint="500"
+            android:hint="@string/destination_dialog_radius_hint"
             android:maxLines="1"/>
     </LinearLayout>
 
@@ -57,7 +57,7 @@
 
         <Button
             style="?android:attr/buttonBarButtonStyle"
-            android:text="Delete"
+            android:text="@string/destination_dialog_button_delete"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/dialogDeleteButton"
@@ -65,7 +65,7 @@
 
         <Button
             style="?android:attr/buttonBarButtonStyle"
-            android:text="OK"
+            android:text="@string/destination_dialog_button_add"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/dialogOkButton"
