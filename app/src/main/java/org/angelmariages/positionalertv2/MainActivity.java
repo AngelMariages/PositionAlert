@@ -18,6 +18,9 @@ import android.view.MenuItem;
 
 import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.model.LatLng;
+/*import com.google.firebase.FirebaseApp;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;*/
 
 import org.angelmariages.positionalertv2.destination.Destination;
 import org.angelmariages.positionalertv2.destination.DestinationDBHelper;
@@ -33,6 +36,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private MapFragmentManager mapFragmentManager;
     private MapFragment mapFragment;
 
+    //private FirebaseAnalytics mFirebaseAnalytics;
+    //private DatabaseReference mDatabase;
+
     private DestinationManager destinationManager;
     private DestinationDBHelper dbHelper;
     private NavigationView navigationView;
@@ -43,7 +49,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        dbHelper = new DestinationDBHelper(this);
+        //mFirebaseAnalytics = FirebaseAnalytics.getInstance(this);
+
+        dbHelper = new DestinationDBHelper(this.getApplicationContext());
+        /*FirebaseApp.initializeApp(this);
+        FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance();
+        mDatabase = firebaseDatabase.getReference();
+        mDatabase.child("destinations").setValue("Hola");*/
 
         Intent intent = getIntent();
         if (intent.hasExtra(Utils.RINGTONE_TO_ACTIVITY)) {
@@ -199,6 +211,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     public void onAdded(Destination addedDestination) {
         mToDBListener.onDestinationAdded((int) dbHelper.insertDestination(addedDestination));
         destinationManager.addDestination(addedDestination);
+        /*Bundle args = new Bundle();
+        args.putString("name", addedDestination.getName());
+        args.putString("radius", String.valueOf(addedDestination.getRadius()));
+        args.putString("latitude", String.valueOf(addedDestination.getLatitude()));
+        args.putString("longitude", String.valueOf(addedDestination.getLongitude()));
+        mFirebaseAnalytics.logEvent("added_destination", args);*/
     }
 
     @Override
