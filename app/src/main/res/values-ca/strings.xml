@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">PositionAlertV2</string>
     <string name="action_settings">Configuració</string>
     <string name="activeSwitch">Activada:</string>
     <string name="deleteOnReachSwitch">Esborrar a l\'arribar</string>

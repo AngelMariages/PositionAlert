@@ -1,7 +1,6 @@
 package org.angelmariages.positionalertv2;
 
 import android.app.Activity;
-import android.content.Context;
 import android.location.Location;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -46,38 +45,38 @@ public class LocationApiClient implements GoogleApiClient.ConnectionCallbacks, G
         if (mGoogleApiClient != null) {
             mGoogleApiClient.disconnect();
             mConnected = false;
-            Utils.sendLog("LocationApiClient: Api disconnected");
+            U.sendLog("LocationApiClient: Api disconnected");
         }
     }
 
     @Override
     public void onConnected(@Nullable Bundle bundle) {
         mConnected = true;
-        Utils.sendLog("GoogleApiClient connected!");
+        U.sendLog("GoogleApiClient connected!");
     }
 
     public Location getLocation() {
-        if(!Utils.checkPositionPermissions(mActivity)) {
-            Utils.askPositionPermissions(mActivity);
+        if(!U.checkPositionPermissions(mActivity)) {
+            U.askPositionPermissions(mActivity);
         }
         try {
             return LocationServices.FusedLocationApi.getLastLocation(
                     mGoogleApiClient);
         } catch (SecurityException e) {
-            Utils.sendLog("LocationApiClient error: can't get permissions to ");
+            U.sendLog("LocationApiClient error: can't get permissions to ");
             return null;
         }
     }
 
     @Override
     public void onConnectionSuspended(int i) {
-        Utils.sendLog("GoogleApiClient connection suspended");
+        U.sendLog("GoogleApiClient connection suspended");
         mConnected = false;
     }
 
     @Override
     public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
-        Utils.sendLog("GoogleApiClient connection failed: " + connectionResult.getErrorMessage());
+        U.sendLog("GoogleApiClient connection failed: " + connectionResult.getErrorMessage());
         mConnected = false;
     }
 

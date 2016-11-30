@@ -10,9 +10,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ExpandableListView;
 
+import org.angelmariages.positionalertv2.U;
 import org.angelmariages.positionalertv2.destination.Destination;
 import org.angelmariages.positionalertv2.R;
-import org.angelmariages.positionalertv2.Utils;
 
 import java.util.ArrayList;
 
@@ -79,7 +79,7 @@ public class DestinationList extends Fragment {
         act.getWindowManager().getDefaultDisplay().getMetrics(dm);
         int width = dm.widthPixels;
 
-        expandableListView.setIndicatorBounds(width - Utils.getDPsFromPixels(35, expandableListView),
-                width - Utils.getDPsFromPixels(5, expandableListView));
+        expandableListView.setIndicatorBounds(width - U.getDPsFromPixels(35, expandableListView),
+                width - U.getDPsFromPixels(5, expandableListView));
     }
 }

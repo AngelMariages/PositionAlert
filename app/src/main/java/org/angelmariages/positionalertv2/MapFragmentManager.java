@@ -125,8 +125,8 @@ public class MapFragmentManager implements OnMapReadyCallback {
     }
 
     private void checkPermissions() {
-        if(!Utils.checkPositionPermissions(mapFragmentActivity)) {
-            Utils.askPositionPermissions(mapFragmentActivity);
+        if(!U.checkPositionPermissions(mapFragmentActivity)) {
+            U.askPositionPermissions(mapFragmentActivity);
         } else {
             setMapParameters();
         }
@@ -189,7 +189,7 @@ public class MapFragmentManager implements OnMapReadyCallback {
 
     private void showMarkerDialog(Destination destination, final Marker marker) {
         if(destination == null) {
-            destination = new Destination(Utils.NULL_ID,
+            destination = new Destination(U.NULL_ID,
                     null,
                     marker.getPosition(),
                     500,
@@ -209,13 +209,13 @@ public class MapFragmentManager implements OnMapReadyCallback {
                 marker.setTitle(destination.getName());
                 circlesByMarker.get(marker).setRadius(destination.getRadius());
                 marker.showInfoWindow();
-                if(destination.getDatabaseID() == Utils.NULL_ID) {
+                if(destination.getDatabaseID() == U.NULL_ID) {
                     mainActivity.setDestinationToDBListener(new DestinationToDBListener() {
                         @Override
                         public void onDestinationAdded(int destinationID) {
                             destination.setDatabaseID(destinationID);
                             marker.setTag(destination);
-                            Utils.showLToast("Destination added succesfully!", mainActivity);
+                            U.showLToast("Destination added succesfully!", mainActivity);
                         }
                     });
 
@@ -225,7 +225,7 @@ public class MapFragmentManager implements OnMapReadyCallback {
                     if(destinationChangeListener != null)
                         destinationChangeListener.onChanged(destination);
 
-                    Utils.showLToast("Destination changed succesfully!", mainActivity);
+                    U.showLToast("Destination changed succesfully!", mainActivity);
                 }
             }
 
@@ -257,7 +257,7 @@ public class MapFragmentManager implements OnMapReadyCallback {
 
     public void updateCamera(LatLng position, int radius) {
         if(googleMap != null) {
-            googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(position, Utils.getZoomByRadius(radius, position.latitude) - 0.5f));
+            googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(position, U.getZoomByRadius(radius, position.latitude) - 0.5f));
         }
     }
 

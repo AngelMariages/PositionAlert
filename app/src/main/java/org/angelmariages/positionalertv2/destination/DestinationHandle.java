@@ -13,7 +13,7 @@ import com.google.android.gms.location.GeofencingRequest;
 
 import org.angelmariages.positionalertv2.MainActivity;
 import org.angelmariages.positionalertv2.R;
-import org.angelmariages.positionalertv2.Utils;
+import org.angelmariages.positionalertv2.U;
 
 import java.util.Arrays;
 import java.util.List;
@@ -23,7 +23,7 @@ public class DestinationHandle extends IntentService {
     private DestinationDBHelper dbHelper;
 
     public DestinationHandle() {
-        super(Utils.DESTINATION_SERVICE_NAME);
+        super(U.DESTINATION_SERVICE_NAME);
     }
 
     @Override
@@ -32,7 +32,7 @@ public class DestinationHandle extends IntentService {
         dbHelper = new DestinationDBHelper(this);
 
         if(geofencingEvent.hasError()) {
-            Utils.sendLog("GeofencingIntent has error: " + geofencingEvent.getErrorCode());
+            U.sendLog("GeofencingIntent has error: " + geofencingEvent.getErrorCode());
             return;
         }
 
@@ -44,7 +44,7 @@ public class DestinationHandle extends IntentService {
 
             for(int i = 0, geofenceListSize = geofenceList.size(); i < geofenceListSize; i++) {
                 Geofence geofence = geofenceList.get(i);
-                Utils.sendLog(geofence.getRequestId() + " : " + geoFenceTransition);
+                U.sendLog(geofence.getRequestId() + " : " + geoFenceTransition);
 
                 parseGeofenceRequest(getGeofenceArguments(geofence.getRequestId()), i == 0);
             }
@@ -53,7 +53,7 @@ public class DestinationHandle extends IntentService {
 
     private void parseGeofenceRequest(String[] geofenceArguments, boolean playSound) {
         if(geofenceArguments == null) {
-            Utils.sendLog("Null geofence arguments!");
+            U.sendLog("Null geofence arguments!");
             return;
         }
         createGeofenceNotification(Integer.parseInt(geofenceArguments[0]), geofenceArguments[1]);
@@ -63,10 +63,10 @@ public class DestinationHandle extends IntentService {
             dbHelper.close();
         }
 
-        String ringtoneSaved = getSharedPreferences(Utils.SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE)
-                .getString(Utils.RINGTONE_PREFERENCE, null);
+        String ringtoneSaved = getSharedPreferences(U.SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE)
+                .getString(U.RINGTONE_PREFERENCE, null);
 
-        Utils.sendLog("SAVED:" + ringtoneSaved);
+        U.sendLog("SAVED:" + ringtoneSaved);
 
         if(playSound)
             startRingtoneActivity(ringtoneSaved);
@@ -105,7 +105,7 @@ public class DestinationHandle extends IntentService {
     private void startRingtoneActivity(String ringtone) {
         Intent intent = new Intent(this, MainActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        intent.putExtra(Utils.RINGTONE_TO_ACTIVITY, ringtone);
+        intent.putExtra(U.RINGTONE_TO_ACTIVITY, ringtone);
         startActivity(intent);
     }
 }

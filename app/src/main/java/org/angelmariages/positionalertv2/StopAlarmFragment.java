@@ -31,8 +31,8 @@ public class StopAlarmFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if(getArguments() != null) {
-            /*String ringtoneSaved = getSharedPreferences(Utils.SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE)
-                    .getString(Utils.RINGTONE_PREFERENCE, null);*/
+            /*String ringtoneSaved = getSharedPreferences(U.SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE)
+                    .getString(U.RINGTONE_PREFERENCE, null);*/
             ringtoneSaved = getArguments().getString(ARG_RINGTONE);
             startRingtone();
         }
@@ -53,7 +53,7 @@ public class StopAlarmFragment extends Fragment {
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                 if(fromUser) {
                     if(progress > 95) {
-                        Utils.showSToast("Stopped!", view.getContext());
+                        U.showSToast("Stopped!", view.getContext());
                         stopRingtone();
                         getActivity().finish();
                     }
@@ -76,7 +76,7 @@ public class StopAlarmFragment extends Fragment {
         if(ringtoneSaved == null || ringtoneSaved.isEmpty()) {
             ringtoneSaved = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_RINGTONE).toString();
         }
-        Utils.sendLog(ringtoneSaved);
+        U.sendLog(ringtoneSaved);
         try {
             mediaPlayer = new MediaPlayer();
             mediaPlayer.setDataSource(getActivity().getApplicationContext(), Uri.parse(ringtoneSaved));
@@ -88,19 +88,19 @@ public class StopAlarmFragment extends Fragment {
             mediaPlayer.setOnErrorListener(new MediaPlayer.OnErrorListener() {
                 @Override
                 public boolean onError(MediaPlayer mediaPlayer, int i, int i1) {
-                    Utils.sendLog("WHAT: " + i + ", EXTRA: " + i1);
+                    U.sendLog("WHAT: " + i + ", EXTRA: " + i1);
                     return false;
                 }
             });
-            Utils.sendLog("STARTED!!");
-            Utils.sendLog("URI: " + ringtoneSaved);
+            U.sendLog("STARTED!!");
+            U.sendLog("URI: " + ringtoneSaved);
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
     private void stopRingtone() {
-        Utils.sendLog("STOPPED!!");
+        U.sendLog("STOPPED!!");
         mediaPlayer.stop();
     }
 }

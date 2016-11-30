@@ -8,7 +8,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 
 import com.google.android.gms.maps.model.LatLng;
 
-import org.angelmariages.positionalertv2.Utils;
+import org.angelmariages.positionalertv2.U;
 
 import java.util.ArrayList;
 
@@ -54,7 +54,7 @@ public class DestinationDBHelper extends SQLiteOpenHelper {
                 COLUMN_ACTIVE + " BOOLEAN, " +
                 COLUMN_DELETEONREACH + " BOOLEAN, " +
                 COLUMN_REGISTERED + " BOOLEAN)");
-        Utils.sendLog("Creating destinations database");
+        U.sendLog("Creating destinations database");
     }
 
     @Override
@@ -80,7 +80,7 @@ public class DestinationDBHelper extends SQLiteOpenHelper {
         content.put(COLUMN_DELETEONREACH, destination.deleteOnReach());
         content.put(COLUMN_REGISTERED, destination.registered());
 
-        Utils.sendLog("Inserting destination to database");
+        U.sendLog("Inserting destination to database");
 
         long result = db.insert(DESTINATIONS_TABLE, null, content);
         db.close();
@@ -160,7 +160,7 @@ public class DestinationDBHelper extends SQLiteOpenHelper {
         SQLiteDatabase db = this.getReadableDatabase();
         Cursor res = db.query(DESTINATIONS_TABLE, columnNames, "id = ?", new String[]{String.valueOf(destinationID)}, null, null, null, null);
 
-        Utils.sendLog("Getting destination: " + destinationID);
+        U.sendLog("Getting destination: " + destinationID);
 
         res.moveToFirst();
         int destID = res.getInt(res.getColumnIndex(COLUMN_ID));

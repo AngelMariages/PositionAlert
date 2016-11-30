@@ -14,10 +14,9 @@ import com.google.android.gms.common.api.Status;
 import com.google.android.gms.location.Geofence;
 import com.google.android.gms.location.GeofencingRequest;
 import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.maps.model.LatLng;
 
 import org.angelmariages.positionalertv2.LocationApiClient;
-import org.angelmariages.positionalertv2.Utils;
+import org.angelmariages.positionalertv2.U;
 
 import java.util.ArrayList;
 
@@ -53,7 +52,7 @@ public class DestinationManager implements ResultCallback<Status> {
                     addGeofence(destination);
                     done = true;
                 } else if(!done) {
-                    Utils.sendLog("Waiting for api to connect");
+                    U.sendLog("Waiting for api to connect");
                 }
             }
 
@@ -81,10 +80,10 @@ public class DestinationManager implements ResultCallback<Status> {
                     getGeofenceRequest(addedGeofence),
                     getGeofencePendingIntent()
             ).setResultCallback(this);
-            Utils.sendLog("Adding geofence["+ destination.generateID() +"] from destination:");
-            Utils.sendLog(destination.toString());
+            U.sendLog("Adding geofence["+ destination.generateID() +"] from destination:");
+            U.sendLog(destination.toString());
         } catch (SecurityException e) {
-            Utils.sendLog("Error adding Geofence, SecurityException");
+            U.sendLog("Error adding Geofence, SecurityException");
             e.printStackTrace();
         } catch(Exception e) {
             e.printStackTrace();
@@ -107,7 +106,7 @@ public class DestinationManager implements ResultCallback<Status> {
     public void removeDestination(final String destinationString) {
         if(!mGoogleApiClient.isConnected()) {
             //TODO: keep trying to remove geofence
-            Utils.sendLog("Error removing Geofence, GoogleApiClient not connected");
+            U.sendLog("Error removing Geofence, GoogleApiClient not connected");
             return;
         }
 
@@ -118,9 +117,9 @@ public class DestinationManager implements ResultCallback<Status> {
                         add(destinationString);
                     }}
             ).setResultCallback(this);
-            Utils.sendLog("Removing geofence[" + destinationString + "]...");
+            U.sendLog("Removing geofence[" + destinationString + "]...");
         } catch(SecurityException e) {
-            Utils.sendLog("Error removing Geofence, SecurityException");
+            U.sendLog("Error removing Geofence, SecurityException");
             e.printStackTrace();
         }
     }
@@ -128,9 +127,9 @@ public class DestinationManager implements ResultCallback<Status> {
     @Override
     public void onResult(@NonNull Status status) {
         if(status.isSuccess()) {
-            Utils.sendLog("Sucess!");
+            U.sendLog("Sucess!");
         } else {
-            Utils.sendLog("Error: " + status.getStatusMessage());
+            U.sendLog("Error: " + status.getStatusMessage());
         }
     }
 }

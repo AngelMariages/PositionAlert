@@ -15,9 +15,9 @@ import com.google.android.gms.maps.GoogleMapOptions;
 import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.model.CameraPosition;
 
+import org.angelmariages.positionalertv2.U;
 import org.angelmariages.positionalertv2.destinationInterfaces.DestinationChangeListener;
 import org.angelmariages.positionalertv2.MapFragmentManager;
-import org.angelmariages.positionalertv2.Utils;
 import org.angelmariages.positionalertv2.destination.Destination;
 import org.angelmariages.positionalertv2.R;
 
@@ -166,7 +166,7 @@ class DestinationListAdapter extends BaseExpandableListAdapter {
         googleMapOptions.liteMode(true);
         googleMapOptions.camera(new CameraPosition.Builder()
                 .target(destinations.get(groupPosition).getdLatLng())
-                .zoom((float)Math.floor(Utils.getZoomByRadius(destinations.get(groupPosition).getRadius(), destinations.get(groupPosition).getLatitude()) - 1.2f))
+                .zoom((float)Math.floor(U.getZoomByRadius(destinations.get(groupPosition).getRadius(), destinations.get(groupPosition).getLatitude()) - 1.2f))
                 .build());
         final MapFragment mapFragment = MapFragment.newInstance(googleMapOptions);
 

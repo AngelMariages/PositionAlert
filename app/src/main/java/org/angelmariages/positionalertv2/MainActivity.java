@@ -18,9 +18,9 @@ import android.view.MenuItem;
 
 import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.model.LatLng;
-/*import com.google.firebase.FirebaseApp;
 import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;*/
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.iid.FirebaseInstanceId;
 
 import org.angelmariages.positionalertv2.destination.Destination;
 import org.angelmariages.positionalertv2.destination.DestinationDBHelper;
@@ -36,30 +36,28 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private MapFragmentManager mapFragmentManager;
     private MapFragment mapFragment;
 
-    //private FirebaseAnalytics mFirebaseAnalytics;
-    //private DatabaseReference mDatabase;
+    private DatabaseReference firebaseRef;
 
     private DestinationManager destinationManager;
     private DestinationDBHelper dbHelper;
     private NavigationView navigationView;
     private DestinationToDBListener mToDBListener;
+    private String uniqueID = "non set";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        //mFirebaseAnalytics = FirebaseAnalytics.getInstance(this);
-
         dbHelper = new DestinationDBHelper(this.getApplicationContext());
-        /*FirebaseApp.initializeApp(this);
-        FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance();
-        mDatabase = firebaseDatabase.getReference();
-        mDatabase.child("destinations").setValue("Hola");*/
+        FirebaseDatabase firebaseDatabase = U.getFirebaseDatabase();
+        firebaseRef = firebaseDatabase.getReference();
+
+        uniqueID = FirebaseInstanceId.getInstance().getId();
 
         Intent intent = getIntent();
-        if (intent.hasExtra(Utils.RINGTONE_TO_ACTIVITY)) {
-            String ringtone = intent.getStringExtra(Utils.RINGTONE_TO_ACTIVITY);
+        if (intent.hasExtra(U.RINGTONE_TO_ACTIVITY)) {
+            String ringtone = intent.getStringExtra(U.RINGTONE_TO_ACTIVITY);
             loadStopAlarmFragment(ringtone);
 
         } else {
@@ -118,14 +116,14 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             intent.putExtra(RingtoneManager.EXTRA_RINGTONE_TITLE, "Select ringtone for alarm:");
             intent.putExtra(RingtoneManager.EXTRA_RINGTONE_SHOW_SILENT, false);
 
-            String ringtoneSaved = getSharedPreferences(Utils.SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE)
-                    .getString(Utils.RINGTONE_PREFERENCE, null);
+            String ringtoneSaved = getSharedPreferences(U.SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE)
+                    .getString(U.RINGTONE_PREFERENCE, null);
             if(ringtoneSaved != null)
                 intent.putExtra(RingtoneManager.EXTRA_RINGTONE_EXISTING_URI, Uri.parse(ringtoneSaved));
 
             intent.putExtra(RingtoneManager.EXTRA_RINGTONE_SHOW_DEFAULT, true);
             intent.putExtra(RingtoneManager.EXTRA_RINGTONE_TYPE, RingtoneManager.TYPE_RINGTONE);
-            startActivityForResult(intent, Utils.RINGTONE_SELECT_RESULT);
+            startActivityForResult(intent, U.RINGTONE_SELECT_RESULT);
             return true;
         }
 
@@ -134,12 +132,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if(requestCode == Utils.RINGTONE_SELECT_RESULT && resultCode == RESULT_OK) {
+        if(requestCode == U.RINGTONE_SELECT_RESULT && resultCode == RESULT_OK) {
             Uri ringtoneUri = data.getParcelableExtra(RingtoneManager.EXTRA_RINGTONE_PICKED_URI);
             Ringtone ringtone = RingtoneManager.getRingtone(this, ringtoneUri);
-            Utils.showSToast("Ringtone selected: " + ringtone.getTitle(this), this);
-            getSharedPreferences(Utils.SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE).edit()
-                    .putString(Utils.RINGTONE_PREFERENCE, ringtoneUri.toString())
+            U.showSToast("Ringtone selected: " + ringtone.getTitle(this), this);
+            getSharedPreferences(U.SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE).edit()
+                    .putString(U.RINGTONE_PREFERENCE, ringtoneUri.toString())
                     .apply();
         }
     }
@@ -211,12 +209,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     public void onAdded(Destination addedDestination) {
         mToDBListener.onDestinationAdded((int) dbHelper.insertDestination(addedDestination));
         destinationManager.addDestination(addedDestination);
-        /*Bundle args = new Bundle();
-        args.putString("name", addedDestination.getName());
-        args.putString("radius", String.valueOf(addedDestination.getRadius()));
-        args.putString("latitude", String.valueOf(addedDestination.getLatitude()));
-        args.putString("longitude", String.valueOf(addedDestination.getLongitude()));
-        mFirebaseAnalytics.logEvent("added_destination", args);*/
+
+        DatabaseReference push = firebaseRef.child("users").child(uniqueID).child("destinations").push();
+        push.setValue(addedDestination);
     }
 
     @Override
@@ -245,7 +240,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         dbHelper.updateValue(destinationID, DestinationDBHelper.COLUMN_DELETEONREACH, deleteOnReach);
         tmpDestination.setDeleteOnReach(deleteOnReach);
         destinationManager.addDestination(tmpDestination);
-        Utils.showSToast(deleteOnReach ? "Destination will be deleted when reached" : "Destination will be kept when reached", this);
+        U.showSToast(deleteOnReach ? "Destination will be deleted when reached" : "Destination will be kept when reached", this);
     }
 
     @Override
