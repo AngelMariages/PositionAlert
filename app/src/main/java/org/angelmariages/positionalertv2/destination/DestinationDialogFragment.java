@@ -35,6 +35,7 @@ public class DestinationDialogFragment extends DialogFragment {
 
     @Override
     public void onDismiss(DialogInterface dialog) {
+        super.onDismiss(dialog);
         if (destinationText.getText().toString().isEmpty()) {
             if (mListener != null) {
                 mListener.onDeleteClicked();

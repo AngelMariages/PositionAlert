@@ -20,6 +20,7 @@ public abstract class U {
     public static final String RINGTONE_TO_ACTIVITY = "org.angelmariages.positionalertv2.STOP_RINGTONE_ACTION";
     public static String geofenceDefaultName = "org.angelmariages.positionalertv2.GEOFENCE_DEFAULT";
     public static final int RINGTONE_SELECT_RESULT = 987;
+    private static FirebaseDatabase mFirebaseDatabase = null;
 
     public static void showSToast(String text, Context context) {
         Toast.makeText(context, text, Toast.LENGTH_SHORT).show();
@@ -76,8 +77,10 @@ public abstract class U {
     }
 
     public static FirebaseDatabase getFirebaseDatabase() {
-        FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance();
-        firebaseDatabase.setPersistenceEnabled(true);
-        return firebaseDatabase;
+        if(mFirebaseDatabase == null) {
+            mFirebaseDatabase = FirebaseDatabase.getInstance();
+            mFirebaseDatabase.setPersistenceEnabled(true);
+        }
+        return mFirebaseDatabase;
     }
 }
