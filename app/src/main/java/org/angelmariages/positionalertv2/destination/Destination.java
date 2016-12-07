@@ -1,6 +1,7 @@
 package org.angelmariages.positionalertv2.destination;
 
 import com.google.android.gms.maps.model.LatLng;
+import com.google.firebase.database.Exclude;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -51,6 +52,7 @@ public class Destination implements Serializable {
         latLng = new LatLng(in.readDouble(), in.readDouble());
     }
 
+    @Exclude
     public int getDatabaseID() {
         return databaseID;
     }
@@ -67,6 +69,7 @@ public class Destination implements Serializable {
         this.deleteOnReach = deleteOnReach;
     }
 
+    @Exclude
     public LatLng getdLatLng() {
         return latLng;
     }

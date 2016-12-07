@@ -7,6 +7,8 @@ import android.util.TypedValue;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.model.BitmapDescriptor;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.Circle;
 import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
@@ -155,15 +157,19 @@ public class MapFragmentManager implements OnMapReadyCallback {
         tmpMarker = googleMap.addMarker(new MarkerOptions()
                 .position(destination.getdLatLng())
                 .draggable(true)
-                .title(destination.getName()));
+                .title(destination.getName())
+                .snippet("active"));
         tmpMarker.setTag(destination);
+        tmpMarker.setAlpha(destination.active() ? 1.0f : 0.5f);
+        BitmapDescriptor bitmap = BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN);
+        tmpMarker.setIcon(bitmap);
         if(showInfoWindow) {
             tmpMarker.showInfoWindow();
         }
         tmpCircle = googleMap.addCircle(new CircleOptions()
                 .center(destination.getdLatLng())
                 .radius(destination.getRadius())
-                .strokeColor(Color.RED)
+                .strokeColor(Color.argb(destination.active() ? 255 : 75, 255, 0, 0))
                 .strokeWidth(5.0f)
                 .fillColor(Color.argb(25, 255, 0, 0)));
         circlesByMarker.put(tmpMarker, tmpCircle);

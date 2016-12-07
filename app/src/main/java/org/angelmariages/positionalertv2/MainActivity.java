@@ -25,7 +25,7 @@ import com.google.firebase.iid.FirebaseInstanceId;
 import org.angelmariages.positionalertv2.destination.Destination;
 import org.angelmariages.positionalertv2.destination.DestinationDBHelper;
 import org.angelmariages.positionalertv2.destination.DestinationManager;
-import org.angelmariages.positionalertv2.destination.destinationlist.DestinationList;
+import org.angelmariages.positionalertv2.destination.destinationList.DestinationList;
 import org.angelmariages.positionalertv2.destinationInterfaces.DestinationChangeListener;
 import org.angelmariages.positionalertv2.destinationInterfaces.DestinationToDBListener;
 
