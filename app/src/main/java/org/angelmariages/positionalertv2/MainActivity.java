@@ -1,5 +1,6 @@
 package org.angelmariages.positionalertv2;
 
+import android.app.ActivityManager;
 import android.content.Context;
 import android.content.Intent;
 import android.media.Ringtone;
@@ -9,12 +10,16 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
+import android.support.v4.view.MenuItemCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.CompoundButton;
+import android.widget.Switch;
 
 import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.model.LatLng;
@@ -35,6 +40,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     private MapFragmentManager mapFragmentManager;
     private MapFragment mapFragment;
+    private Switch activeModeSwitch;
 
     private DatabaseReference firebaseRef;
 
@@ -64,7 +70,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             loadMapFragment();
         }
 
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);//Afegir Toolbar de dalt
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
         destinationManager = new DestinationManager(this);
@@ -75,8 +81,26 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         drawer.addDrawerListener(toggle);
         toggle.syncState();
 
-        navigationView = (NavigationView) findViewById(R.id.nav_view);//Afegir panell de l'esquerra de nav
+        navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
+
+        if(navigationView != null) {
+            navigationView.getMenu().getItem(0).setChecked(true);
+            //--
+            MenuItem activeMode = navigationView.getMenu().findItem(R.id.activeModeItem);
+            activeModeSwitch = (Switch) MenuItemCompat.getActionView(activeMode);
+            activeModeSwitch.setChecked(isInActiveMode());
+            activeModeSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                @Override
+                public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+                    if(b) {
+                        startActiveMode();
+                    } else {
+                        stopActiveMode();
+                    }
+                }
+            });
+        }
     }
 
     @Override
@@ -93,12 +117,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.main, menu);
-        return true;
+        return super.onCreateOptionsMenu(menu);
     }
 
     @Override
     protected void onDestroy() {
         dbHelper.close();
+        stopActiveMode();
         destinationManager.disconnectApiClient();
         super.onDestroy();
     }
@@ -202,6 +227,25 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         mapFragment = null;
         mapFragmentManager = null;
+    }
+
+    private void startActiveMode() {
+        //@TODO Change this to one method
+        if(!isInActiveMode()) startService(new Intent(getBaseContext(), ActiveModeService.class));
+    }
+
+    private void stopActiveMode() {
+        if(isInActiveMode()) stopService(new Intent(getBaseContext(), ActiveModeService.class));
+    }
+
+    private boolean isInActiveMode() {
+        ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
+        for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
+            if (ActiveModeService.class.getName().equals(service.service.getClassName())) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /** START overrided methods of DestinationChangeListener */

@@ -1,6 +1,7 @@
 package org.angelmariages.positionalertv2;
 
 import android.app.Activity;
+import android.content.Context;
 import android.location.Location;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -13,20 +14,21 @@ import com.google.android.gms.location.LocationServices;
 public class LocationApiClient implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
 
     private GoogleApiClient mGoogleApiClient;
-    private Activity mActivity;
+    private Context mContext;
     private boolean mConnected;
 
+    //@TODO Review this class
     public LocationApiClient() {
     }
 
-    public GoogleApiClient getApiClient(Activity activity) {
-        if (mActivity == null) {
-            mActivity = activity;
+    public GoogleApiClient getApiClient(Context context) {
+        if (mContext == null) {
+            mContext = context;
         }
         if (mGoogleApiClient != null) {
             return mGoogleApiClient;
         } else {
-            mGoogleApiClient = new GoogleApiClient.Builder(mActivity)
+            mGoogleApiClient = new GoogleApiClient.Builder(mContext)
                     .addConnectionCallbacks(this)
                     .addOnConnectionFailedListener(this)
                     .addApi(LocationServices.API)
@@ -56,9 +58,6 @@ public class LocationApiClient implements GoogleApiClient.ConnectionCallbacks, G
     }
 
     public Location getLocation() {
-        if(!U.checkPositionPermissions(mActivity)) {
-            U.askPositionPermissions(mActivity);
-        }
         try {
             return LocationServices.FusedLocationApi.getLastLocation(
                     mGoogleApiClient);

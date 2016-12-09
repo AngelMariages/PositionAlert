@@ -18,6 +18,7 @@ public abstract class U {
     public static final String RINGTONE_PREFERENCE = "org.angelmariages.positionalertv2.RINGTONE_PREFERENCE_";
     public static final int NULL_ID = -1;
     public static final String RINGTONE_TO_ACTIVITY = "org.angelmariages.positionalertv2.STOP_RINGTONE_ACTION";
+    public static final String RESTART_SERVICE_INTENT = "org.angelmariages.positionalertv2.RESTART_SERVICE_INTENT";
     public static String geofenceDefaultName = "org.angelmariages.positionalertv2.GEOFENCE_DEFAULT";
     public static final int RINGTONE_SELECT_RESULT = 987;
     private static FirebaseDatabase mFirebaseDatabase = null;

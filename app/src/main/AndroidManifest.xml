@@ -34,6 +34,18 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <service android:name=".ActiveModeService" />
+
+        <receiver
+            android:name="org.angelmariages.positionalertv2.ActiveModeRestart"
+            android:enabled="true"
+            android:exported="true"
+            android:label="RestartActiveMode">
+            <intent-filter>
+                <action android:name="org.angelmariages.positionalertv2.RESTART_SERVICE_INTENT"/>
+            </intent-filter>
+        </receiver>
     </application>
 
 </manifest>

@@ -23,12 +23,14 @@ import java.util.ArrayList;
 public class DestinationManager implements ResultCallback<Status> {
     private final GoogleApiClient mGoogleApiClient;
     private final Context mContext;
+    private final Activity mActivity;
     private final LocationApiClient mLocationApiClient;
 
     public DestinationManager(Activity activity) {
-        this.mContext = activity.getApplicationContext();
+        mActivity = activity;
+        mContext = activity.getApplicationContext();
         mLocationApiClient = new LocationApiClient();
-        this.mGoogleApiClient = mLocationApiClient.getApiClient(activity);
+        mGoogleApiClient = mLocationApiClient.getApiClient(mContext);
         mLocationApiClient.connect();
     }
 
@@ -37,6 +39,9 @@ public class DestinationManager implements ResultCallback<Status> {
     }
 
     public Location getCurrentPosition() {
+        if(!U.checkPositionPermissions(mActivity)) {
+            U.askPositionPermissions(mActivity);
+        }
         if (mLocationApiClient.isConnected()) {
             return mLocationApiClient.getLocation();
         }

@@ -22,4 +22,5 @@
     <string name="destination_dialog_radius_hint" translatable="false">500</string>
     <string name="destination_dialog_button_delete">Delete</string>
     <string name="destination_dialog_button_add">Add</string>
+    <string name="active_mode">Active Mode</string>
 </resources>

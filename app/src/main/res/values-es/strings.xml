@@ -16,4 +16,5 @@
     <string name="radiusText">Radio (m): %d</string>
     <string name="sound_select_menu_text">Selecciona un sonido de notificación</string>
     <string name="stop_alarm_message">Muevelo hacia la derecha para detener la alarma</string>
+    <string name="active_mode">Modo activo</string>
 </resources>
