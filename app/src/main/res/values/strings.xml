@@ -23,4 +23,5 @@
     <string name="destination_dialog_button_delete">Delete</string>
     <string name="destination_dialog_button_add">Add</string>
     <string name="active_mode">Active Mode</string>
+    <string name="buttonLogin">Login</string>
 </resources>

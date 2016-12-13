@@ -15,20 +15,14 @@ import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 
-public class ActiveModeService extends Service implements LocationListener, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
+public class ActiveModeService extends Service implements LocationListener {
     private GoogleApiClient mGoogleApiClient;
     private LocationRequest mLocationRequest;
 
     @Override
     public void onCreate() {
         super.onCreate();
-        mGoogleApiClient = new GoogleApiClient.Builder(this)
-                .addApi(LocationServices.API)
-                .addConnectionCallbacks(this)
-                .addOnConnectionFailedListener(this)
-                .build();
-
-        mGoogleApiClient.connect();
+        mGoogleApiClient = GApiClient.getInstance(this);
     }
 
     @Nullable
@@ -79,21 +73,6 @@ public class ActiveModeService extends Service implements LocationListener, Goog
             mGoogleApiClient.disconnect();
             U.sendLog("DISCONNECTED");
         }
-    }
-
-    @Override
-    public void onConnected(@Nullable Bundle bundle) {
-        U.sendLog("CONNECTED");
-    }
-
-    @Override
-    public void onConnectionSuspended(int i) {
-
-    }
-
-    @Override
-    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
-
     }
 
     @Override

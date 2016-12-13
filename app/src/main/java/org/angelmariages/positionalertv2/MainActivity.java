@@ -19,7 +19,10 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.CompoundButton;
+import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.Switch;
+import android.widget.TextView;
 
 import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.model.LatLng;
@@ -33,6 +36,8 @@ import org.angelmariages.positionalertv2.destination.DestinationManager;
 import org.angelmariages.positionalertv2.destination.destinationList.DestinationList;
 import org.angelmariages.positionalertv2.destinationInterfaces.DestinationChangeListener;
 import org.angelmariages.positionalertv2.destinationInterfaces.DestinationToDBListener;
+import org.angelmariages.positionalertv2.userManager.AuthManager;
+import org.angelmariages.positionalertv2.userManager.DownloadUserImage;
 
 import java.util.ArrayList;
 
@@ -40,7 +45,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     private MapFragmentManager mapFragmentManager;
     private MapFragment mapFragment;
-    private Switch activeModeSwitch;
 
     private DatabaseReference firebaseRef;
 
@@ -49,6 +53,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private NavigationView navigationView;
     private DestinationToDBListener mToDBListener;
     private String uniqueID = "non set";
+
+    private AuthManager mAuthManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -88,7 +94,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             navigationView.getMenu().getItem(0).setChecked(true);
             //--
             MenuItem activeMode = navigationView.getMenu().findItem(R.id.activeModeItem);
-            activeModeSwitch = (Switch) MenuItemCompat.getActionView(activeMode);
+            Switch activeModeSwitch = (Switch) MenuItemCompat.getActionView(activeMode);
             activeModeSwitch.setChecked(isInActiveMode());
             activeModeSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
                 @Override
@@ -100,7 +106,47 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     }
                 }
             });
+            //--
+            ImageButton loginButton = (ImageButton) navigationView.getHeaderView(0).findViewById(R.id.buttonLogout);
+            loginButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    mAuthManager.signOut();
+                }
+            });
         }
+
+        //--
+        mAuthManager = new AuthManager(this);
+        mAuthManager.signIn();
+        mAuthManager.setSuccesfulLoginListener(new AuthManager.OnSuccesfulLoginListener() {
+            @Override
+            public void succesfulLogin(String username, String email, Uri image) {
+                View headerView = navigationView.getHeaderView(0);
+                TextView userName = (TextView) headerView.findViewById(R.id.userNameText);
+                TextView userEmail = (TextView) headerView.findViewById(R.id.userEmailText);
+                ImageView userImage = (ImageView) headerView.findViewById(R.id.userImageView);
+
+                userName.setText(username);
+                userEmail.setText(email);
+
+                new DownloadUserImage(userImage, MainActivity.this.getApplicationContext())
+                        .execute(image.toString());
+            }
+        });
+        mAuthManager.setOnLogoutListener(new AuthManager.LogoutListener() {
+            @Override
+            public void onLogout() {
+                View headerView = navigationView.getHeaderView(0);
+                TextView userName = (TextView) headerView.findViewById(R.id.userNameText);
+                TextView userEmail = (TextView) headerView.findViewById(R.id.userEmailText);
+                ImageView userImage = (ImageView) headerView.findViewById(R.id.userImageView);
+
+                userName.setText("");
+                userEmail.setText("");
+                userImage.setImageBitmap(null);
+            }
+        });
     }
 
     @Override
@@ -125,14 +171,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         dbHelper.close();
         stopActiveMode();
         destinationManager.disconnectApiClient();
+        mAuthManager.removeListener();
         super.onDestroy();
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
@@ -164,6 +208,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             getSharedPreferences(U.SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE).edit()
                     .putString(U.RINGTONE_PREFERENCE, ringtoneUri.toString())
                     .apply();
+        } else if(requestCode == 1) {
+            if(mAuthManager != null) {
+                mAuthManager.onActivityResult(requestCode, resultCode, data);
+            }
         }
     }
 
@@ -254,7 +302,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         mToDBListener.onDestinationAdded((int) dbHelper.insertDestination(addedDestination));
         destinationManager.addDestination(addedDestination);
 
-        DatabaseReference push = firebaseRef.child("users").child(uniqueID).child("destinations").push();
+        DatabaseReference push = firebaseRef.child("users")
+                .child(mAuthManager.getUserUID() != null ? mAuthManager.getUserUID() : uniqueID)
+                .child("destinations")
+                .push();
         push.setValue(addedDestination);
     }
 
@@ -317,7 +368,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         switch (requestCode) {
-            //@TODO change with another code
+            //@TODO change with another code, imrpove all permission request
             case 0: {
                 mapFragmentManager.setMapParameters();
             } break;
@@ -325,5 +376,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 super.onRequestPermissionsResult(requestCode, permissions, grantResults);
             }
         }
+    }
+
+    public interface OnActivityResultListener {
+        void onActivityResult(int requestCode, int resultCode, Intent data);
     }
 }

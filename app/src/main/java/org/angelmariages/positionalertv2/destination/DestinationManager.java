@@ -15,6 +15,7 @@ import com.google.android.gms.location.Geofence;
 import com.google.android.gms.location.GeofencingRequest;
 import com.google.android.gms.location.LocationServices;
 
+import org.angelmariages.positionalertv2.GApiClient;
 import org.angelmariages.positionalertv2.LocationApiClient;
 import org.angelmariages.positionalertv2.U;
 
@@ -31,18 +32,17 @@ public class DestinationManager implements ResultCallback<Status> {
         mContext = activity.getApplicationContext();
         mLocationApiClient = new LocationApiClient();
         mGoogleApiClient = mLocationApiClient.getApiClient(mContext);
-        mLocationApiClient.connect();
     }
 
     public void disconnectApiClient() {
-        mLocationApiClient.disconnect();
+        GApiClient.removeInstance();
     }
 
     public Location getCurrentPosition() {
         if(!U.checkPositionPermissions(mActivity)) {
             U.askPositionPermissions(mActivity);
         }
-        if (mLocationApiClient.isConnected()) {
+        if (mGoogleApiClient.isConnected()) {
             return mLocationApiClient.getLocation();
         }
         return null;
@@ -53,7 +53,7 @@ public class DestinationManager implements ResultCallback<Status> {
             boolean done;
             @Override
             public void onTick(long l) {
-                if (!done && mLocationApiClient.isConnected()) {
+                if (!done && mGoogleApiClient.isConnected()) {
                     addGeofence(destination);
                     done = true;
                 } else if(!done) {
@@ -111,7 +111,7 @@ public class DestinationManager implements ResultCallback<Status> {
     public void removeDestination(final String destinationString) {
         if(!mGoogleApiClient.isConnected()) {
             //TODO: keep trying to remove geofence
-            U.sendLog("Error removing Geofence, GoogleApiClient not connected");
+            U.sendLog("Error removing Geofence, GApiClient not connected");
             return;
         }
 
@@ -136,5 +136,9 @@ public class DestinationManager implements ResultCallback<Status> {
         } else {
             U.sendLog("Error: " + status.getStatusMessage());
         }
+    }
+
+    public GoogleApiClient getmGoogleApiClient() {
+        return mGoogleApiClient;
     }
 }

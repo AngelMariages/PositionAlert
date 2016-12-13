@@ -17,4 +17,5 @@
     <string name="sound_select_menu_text">Selecciona un tó de notificació</string>
     <string name="stop_alarm_message">Mou-lo cap a la dreta per parar l\'alarma</string>
     <string name="active_mode">Mode actiu</string>
+    <string name="buttonLogin">Button</string>
 </resources>

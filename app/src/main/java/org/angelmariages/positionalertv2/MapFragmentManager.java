@@ -161,7 +161,7 @@ public class MapFragmentManager implements OnMapReadyCallback {
                 .snippet("active"));
         tmpMarker.setTag(destination);
         tmpMarker.setAlpha(destination.active() ? 1.0f : 0.5f);
-        BitmapDescriptor bitmap = BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN);
+        BitmapDescriptor bitmap = BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_ROSE);
         tmpMarker.setIcon(bitmap);
         if(showInfoWindow) {
             tmpMarker.showInfoWindow();
@@ -182,6 +182,8 @@ public class MapFragmentManager implements OnMapReadyCallback {
         tmpMarker = googleMap.addMarker(new MarkerOptions()
                 .position(latLng)
                 .draggable(true));
+        BitmapDescriptor bitmap = BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_ROSE);
+        tmpMarker.setIcon(bitmap);
         tmpCircle = googleMap.addCircle(new CircleOptions()
                 .center(latLng)
                 .radius(500)
