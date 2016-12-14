@@ -17,8 +17,8 @@ import com.google.android.gms.maps.model.MarkerOptions;
 
 import org.angelmariages.positionalertv2.destination.Destination;
 import org.angelmariages.positionalertv2.destination.DestinationDialogFragment;
-import org.angelmariages.positionalertv2.destinationInterfaces.DestinationChangeListener;
-import org.angelmariages.positionalertv2.destinationInterfaces.DestinationToDBListener;
+import org.angelmariages.positionalertv2.destination.destinationInterfaces.DestinationChangeListener;
+import org.angelmariages.positionalertv2.destination.destinationInterfaces.DestinationToDBListener;
 
 import java.util.ArrayList;
 import java.util.HashMap;

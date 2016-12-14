@@ -18,9 +18,11 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.Switch;
 import android.widget.TextView;
 
@@ -34,14 +36,14 @@ import org.angelmariages.positionalertv2.destination.Destination;
 import org.angelmariages.positionalertv2.destination.DestinationDBHelper;
 import org.angelmariages.positionalertv2.destination.DestinationManager;
 import org.angelmariages.positionalertv2.destination.destinationList.DestinationList;
-import org.angelmariages.positionalertv2.destinationInterfaces.DestinationChangeListener;
-import org.angelmariages.positionalertv2.destinationInterfaces.DestinationToDBListener;
+import org.angelmariages.positionalertv2.destination.destinationInterfaces.DestinationChangeListener;
+import org.angelmariages.positionalertv2.destination.destinationInterfaces.DestinationToDBListener;
 import org.angelmariages.positionalertv2.userManager.AuthManager;
 import org.angelmariages.positionalertv2.userManager.DownloadUserImage;
 
 import java.util.ArrayList;
 
-public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, DestinationChangeListener, MapFragmentManager.OnDescriptionMapClickListener {
+public class MainActivity extends AppCompatActivity implements DestinationChangeListener, MapFragmentManager.OnDescriptionMapClickListener {
 
     private MapFragmentManager mapFragmentManager;
     private MapFragment mapFragment;
@@ -88,47 +90,62 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         toggle.syncState();
 
         navigationView = (NavigationView) findViewById(R.id.nav_view);
-        navigationView.setNavigationItemSelectedListener(this);
+        NavigationView.OnNavigationItemSelectedListener itemSelectedListener = new NavigationView.OnNavigationItemSelectedListener() {
+            @Override
+            public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+                // Handle navigation view item clicks here.
+                int id = item.getItemId();
+
+                if (id == R.id.nav_map) {
+                    loadMapFragment();
+                } else if (id == R.id.nav_destinationsList) {
+                    loadDestinationsListFragment();
+                }
+
+                DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+                drawer.closeDrawer(GravityCompat.START);
+                return true;
+            }
+        };
+
+        navigationView.setNavigationItemSelectedListener(itemSelectedListener);
 
         if(navigationView != null) {
             navigationView.getMenu().getItem(0).setChecked(true);
             //--
             MenuItem activeMode = navigationView.getMenu().findItem(R.id.activeModeItem);
             Switch activeModeSwitch = (Switch) MenuItemCompat.getActionView(activeMode);
-            activeModeSwitch.setChecked(isInActiveMode());
+            activeModeSwitch.setChecked(U.isInActiveMode(this.getApplicationContext()));
             activeModeSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
                 @Override
                 public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
-                    if(b) {
-                        startActiveMode();
-                    } else {
-                        stopActiveMode();
-                    }
-                }
-            });
-            //--
-            ImageButton loginButton = (ImageButton) navigationView.getHeaderView(0).findViewById(R.id.buttonLogout);
-            loginButton.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    mAuthManager.signOut();
+                    setActiveMode(b);
                 }
             });
         }
 
         //--
         mAuthManager = new AuthManager(this);
-        mAuthManager.signIn();
         mAuthManager.setSuccesfulLoginListener(new AuthManager.OnSuccesfulLoginListener() {
             @Override
             public void succesfulLogin(String username, String email, Uri image) {
+                navigationView.removeHeaderView(navigationView.getHeaderView(0));
+                navigationView.inflateHeaderView(R.layout.nav_header_main);
                 View headerView = navigationView.getHeaderView(0);
                 TextView userName = (TextView) headerView.findViewById(R.id.userNameText);
                 TextView userEmail = (TextView) headerView.findViewById(R.id.userEmailText);
                 ImageView userImage = (ImageView) headerView.findViewById(R.id.userImageView);
+                ImageButton logoutButton = (ImageButton) navigationView.getHeaderView(0).findViewById(R.id.buttonLogout);
 
                 userName.setText(username);
                 userEmail.setText(email);
+
+                logoutButton.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        mAuthManager.signOut();
+                    }
+                });
 
                 new DownloadUserImage(userImage, MainActivity.this.getApplicationContext())
                         .execute(image.toString());
@@ -137,14 +154,21 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         mAuthManager.setOnLogoutListener(new AuthManager.LogoutListener() {
             @Override
             public void onLogout() {
+                navigationView.removeHeaderView(navigationView.getHeaderView(0));
+                navigationView.inflateHeaderView(R.layout.nav_header_loggedout);
                 View headerView = navigationView.getHeaderView(0);
-                TextView userName = (TextView) headerView.findViewById(R.id.userNameText);
-                TextView userEmail = (TextView) headerView.findViewById(R.id.userEmailText);
-                ImageView userImage = (ImageView) headerView.findViewById(R.id.userImageView);
+                final Button loginButton = (Button) headerView.findViewById(R.id.buttonLogin);
+                final ProgressBar progressBar = (ProgressBar) headerView.findViewById(R.id.loginProgressBar);
 
-                userName.setText("");
-                userEmail.setText("");
-                userImage.setImageBitmap(null);
+                loginButton.setEnabled(true);
+                loginButton.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        loginButton.setEnabled(false);
+                        progressBar.setVisibility(View.VISIBLE);
+                        mAuthManager.signIn();
+                    }
+                });
             }
         });
     }
@@ -169,7 +193,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     @Override
     protected void onDestroy() {
         dbHelper.close();
-        stopActiveMode();
         destinationManager.disconnectApiClient();
         mAuthManager.removeListener();
         super.onDestroy();
@@ -213,22 +236,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 mAuthManager.onActivityResult(requestCode, resultCode, data);
             }
         }
-    }
-
-    @Override
-    public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-        // Handle navigation view item clicks here.
-        int id = item.getItemId();
-
-        if (id == R.id.nav_map) {
-            loadMapFragment();
-        } else if (id == R.id.nav_destinationsList) {
-            loadDestinationsListFragment();
-        }
-
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        drawer.closeDrawer(GravityCompat.START);
-        return true;
     }
 
     private void loadStopAlarmFragment(String ringtone) {
@@ -277,23 +284,17 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         mapFragmentManager = null;
     }
 
-    private void startActiveMode() {
-        //@TODO Change this to one method
-        if(!isInActiveMode()) startService(new Intent(getBaseContext(), ActiveModeService.class));
-    }
-
-    private void stopActiveMode() {
-        if(isInActiveMode()) stopService(new Intent(getBaseContext(), ActiveModeService.class));
-    }
-
-    private boolean isInActiveMode() {
-        ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
-        for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
-            if (ActiveModeService.class.getName().equals(service.service.getClassName())) {
-                return true;
-            }
+    private void setActiveMode(boolean active) {
+        if(active) {
+            if (!U.isInActiveMode(this.getApplicationContext()))
+                startService(new Intent(getBaseContext(), ActiveModeService.class));
+        } else {
+            if(U.isInActiveMode(this.getApplicationContext()))
+                stopService(new Intent(getBaseContext(), ActiveModeService.class));
         }
-        return false;
+        getSharedPreferences(U.SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE).edit()
+                .putBoolean(U.ACTIVE_MODE_PREFERENCE, active)
+                .apply();
     }
 
     /** START overrided methods of DestinationChangeListener */

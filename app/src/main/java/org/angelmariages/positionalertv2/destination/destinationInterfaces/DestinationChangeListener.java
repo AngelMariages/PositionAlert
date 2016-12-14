@@ -1,4 +1,4 @@
-package org.angelmariages.positionalertv2.destinationInterfaces;
+package org.angelmariages.positionalertv2.destination.destinationInterfaces;
 
 import com.google.android.gms.maps.model.LatLng;
 import org.angelmariages.positionalertv2.destination.Destination;

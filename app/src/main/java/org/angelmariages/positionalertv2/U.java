@@ -2,6 +2,7 @@ package org.angelmariages.positionalertv2;
 
 import android.Manifest;
 import android.app.Activity;
+import android.app.ActivityManager;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.support.v4.app.ActivityCompat;
@@ -19,7 +20,7 @@ public abstract class U {
     public static final int NULL_ID = -1;
     public static final String RINGTONE_TO_ACTIVITY = "org.angelmariages.positionalertv2.STOP_RINGTONE_ACTION";
     public static final String RESTART_SERVICE_INTENT = "org.angelmariages.positionalertv2.RESTART_SERVICE_INTENT";
-    public static String geofenceDefaultName = "org.angelmariages.positionalertv2.GEOFENCE_DEFAULT";
+    public static final String ACTIVE_MODE_PREFERENCE = "org.angelmariages.positionalertv2.ACTIVE_MODE_PREFERENCE";
     public static final int RINGTONE_SELECT_RESULT = 987;
     private static FirebaseDatabase mFirebaseDatabase = null;
 
@@ -83,5 +84,15 @@ public abstract class U {
             mFirebaseDatabase.setPersistenceEnabled(true);
         }
         return mFirebaseDatabase;
+    }
+
+    public static boolean isInActiveMode(Context context) {
+        ActivityManager manager = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
+        for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
+            if (ActiveModeService.class.getName().equals(service.service.getClassName())) {
+                return true;
+            }
+        }
+        return false;
     }
 }

@@ -65,6 +65,7 @@ public class ActiveModeService extends Service implements LocationListener {
     @Override
     public void onDestroy() {
         super.onDestroy();
+        //@TODO Stop service if there're not active destinations
         Intent broadcastIntent = new Intent(U.RESTART_SERVICE_INTENT);
         sendBroadcast(broadcastIntent);
         if(mGoogleApiClient.isConnected()) {

@@ -12,7 +12,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 
-public class DownloadUserImage extends AsyncTask<String, Integer, Bitmap> {
+public class DownloadUserImage extends AsyncTask<String, Void, Bitmap> {
 
     private ImageView imageView;
     private Context mContext;

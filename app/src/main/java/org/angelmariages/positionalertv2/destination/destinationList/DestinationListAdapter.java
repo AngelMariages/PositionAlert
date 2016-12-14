@@ -16,7 +16,7 @@ import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.model.CameraPosition;
 
 import org.angelmariages.positionalertv2.U;
-import org.angelmariages.positionalertv2.destinationInterfaces.DestinationChangeListener;
+import org.angelmariages.positionalertv2.destination.destinationInterfaces.DestinationChangeListener;
 import org.angelmariages.positionalertv2.MapFragmentManager;
 import org.angelmariages.positionalertv2.destination.Destination;
 import org.angelmariages.positionalertv2.R;
