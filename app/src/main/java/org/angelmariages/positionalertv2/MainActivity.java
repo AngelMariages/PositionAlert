@@ -1,6 +1,5 @@
 package org.angelmariages.positionalertv2;
 
-import android.app.ActivityManager;
 import android.content.Context;
 import android.content.Intent;
 import android.media.Ringtone;
@@ -30,7 +29,6 @@ import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.iid.FirebaseInstanceId;
 
 import org.angelmariages.positionalertv2.destination.Destination;
 import org.angelmariages.positionalertv2.destination.DestinationDBHelper;
@@ -54,7 +52,6 @@ public class MainActivity extends AppCompatActivity implements DestinationChange
     private DestinationDBHelper dbHelper;
     private NavigationView navigationView;
     private DestinationToDBListener mToDBListener;
-    private String uniqueID = "non set";
 
     private AuthManager mAuthManager;
 
@@ -66,8 +63,6 @@ public class MainActivity extends AppCompatActivity implements DestinationChange
         dbHelper = new DestinationDBHelper(this.getApplicationContext());
         FirebaseDatabase firebaseDatabase = U.getFirebaseDatabase();
         firebaseRef = firebaseDatabase.getReference();
-
-        uniqueID = FirebaseInstanceId.getInstance().getId();
 
         Intent intent = getIntent();
         if (intent.hasExtra(U.RINGTONE_TO_ACTIVITY)) {
@@ -303,11 +298,13 @@ public class MainActivity extends AppCompatActivity implements DestinationChange
         mToDBListener.onDestinationAdded((int) dbHelper.insertDestination(addedDestination));
         destinationManager.addDestination(addedDestination);
 
-        DatabaseReference push = firebaseRef.child("users")
-                .child(mAuthManager.getUserUID() != null ? mAuthManager.getUserUID() : uniqueID)
-                .child("destinations")
-                .push();
-        push.setValue(addedDestination);
+        if(mAuthManager.getUserUID() != null) {
+            DatabaseReference push = firebaseRef.child("users")
+                    .child(mAuthManager.getUserUID())
+                    .child("destinations")
+                    .push();
+            push.setValue(addedDestination);
+        }
     }
 
     @Override
@@ -336,7 +333,9 @@ public class MainActivity extends AppCompatActivity implements DestinationChange
         dbHelper.updateValue(destinationID, DestinationDBHelper.COLUMN_DELETEONREACH, deleteOnReach);
         tmpDestination.setDeleteOnReach(deleteOnReach);
         destinationManager.addDestination(tmpDestination);
-        U.showSToast(deleteOnReach ? "Destination will be deleted when reached" : "Destination will be kept when reached", this);
+        String active = getResources().getString(R.string.deleteOnReachToastActive);
+        String inactive = getResources().getString(R.string.deleteOnReachToastInactive);
+        U.showSToast(deleteOnReach ? active : inactive, this);
     }
 
     @Override

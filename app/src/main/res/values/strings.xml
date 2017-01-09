@@ -24,4 +24,6 @@
     <string name="destination_dialog_button_add">Add</string>
     <string name="active_mode">Active Mode</string>
     <string name="buttonLogin">Login</string>
+    <string name="deleteOnReachToastActive">Destination will be deleted when reached</string>
+    <string name="deleteOnReachToastInactive">Destination will be kept when reached</string>
 </resources>

@@ -18,4 +18,6 @@
     <string name="stop_alarm_message">Muevelo hacia la derecha para detener la alarma</string>
     <string name="active_mode">Modo activo</string>
     <string name="buttonLogin">Button</string>
+    <string name="deleteOnReachToastActive">La destinación se borrara al llegar</string>
+    <string name="deleteOnReachToastInactive">La destinación se mantendrá al llegar</string>
 </resources>

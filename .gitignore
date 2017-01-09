@@ -1,0 +1,9 @@
+.idea/*
+keyStore.jks
+app/google-services.json
+app/app-release.apk
+.gradle/*
+codeiris/*
+build/*
+local.properties
+app/build/*

@@ -39,10 +39,11 @@ public class DownloadUserImage extends AsyncTask<String, Void, Bitmap> {
     @Override
     protected void onPostExecute(Bitmap bitmap) {
         super.onPostExecute(bitmap);
-        RoundedBitmapDrawable dr =
-                RoundedBitmapDrawableFactory.create(mContext.getResources(), bitmap);
-        dr.setCornerRadius(Math.max(bitmap.getWidth(), bitmap.getHeight()) / 2.0f);
-        imageView.setImageDrawable(dr);
-        //imageView.setImageBitmap(bitmap);
+        if(bitmap != null) {
+            RoundedBitmapDrawable dr =
+                    RoundedBitmapDrawableFactory.create(mContext.getResources(), bitmap);
+            dr.setCornerRadius(Math.max(bitmap.getWidth(), bitmap.getHeight()) / 2.0f);
+            imageView.setImageDrawable(dr);
+        }
     }
 }
